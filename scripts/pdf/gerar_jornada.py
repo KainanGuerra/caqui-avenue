@@ -166,6 +166,7 @@ DIAGRAMA_DE = {
     'acesso-e-papeis.feature': 'fluxo-login-e-papeis',
     'painel-do-atendente.feature': 'fluxo-atendente',
     'redacao-e-validacao.feature': 'sequencia-pergunta-de-prazo',
+    'home.feature': 'fluxo-home',
 }
 
 
@@ -317,6 +318,9 @@ def build(images):
     s += pagina('Fluxo do atendente', 'Da fila ao fechamento do caso',
                 'O Jonas n\u00e3o pergunta de novo o que o cliente j\u00e1 contou.', 'fluxo-atendente', 290,
                 ['Golpe segue \u00e0 seguran\u00e7a; recomenda\u00e7\u00e3o segue ao especialista.', 'Fora do hor\u00e1rio o caso entra na fila \u00e0s 8h.', 'Fechar guarda o hist\u00f3rico pelo protocolo.'])
+    s += pagina('Home do cliente', 'O que est\u00e1 em andamento, sem a tela calcular nada',
+                'O servidor monta patrim\u00f4nio, etapas, aloca\u00e7\u00e3o e avisos; a tela s\u00f3 exibe.', 'fluxo-home', 360,
+                ['As etapas usam o corte das 16h e os dias \u00fateis, com fonte KB-006 e o id da opera\u00e7\u00e3o.', 'Feriado nos pr\u00f3ximos 5 dias \u00fateis vira aviso; feriado no fim de semana n\u00e3o.', 'Resgatar abre a conversa com "Quando cai meu resgate?".'], lado=True)
     s += pagina('Liquidação passo a passo', 'Como a data de pagamento \u00e9 calculada',
                 'Para a sala validar a conta.', 'fluxo-liquidacao', 290,
                 ['Corte das 16h; fim de semana e feriado v\u00e3o para o pr\u00f3ximo dia \u00fatil.', 'Exemplo do case: sexta 30/10 \u00e0s 17h, feriado na segunda: pagamento do fundo em 05/11.', 'A data \u00e9 sempre calculada, nunca lida da planilha.'])

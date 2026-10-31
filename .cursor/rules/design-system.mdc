@@ -1,0 +1,61 @@
+---
+description: Identidade Caqui e regras de interface da Kaki (Nuxt UI). Use ao criar ou mudar qualquer coisa em app/.
+globs: app/**/*.vue,app/**/*.ts,app/assets/**/*.css
+alwaysApply: false
+---
+
+# Interface da Kaki: regras para o agente
+
+Fonte visual: Figma `tl9FFynv0PPlTdnLkGVPPb` (páginas 00 a 04). O mapa tela → arquivo está em `documentation/FIGMA_HANDOFF.md`. Leia antes de mexer em `app/`.
+
+## O que não muda
+
+- A tela nunca calcula regra (CLAUDE.md). Data de liquidação, motivo da data, IR, rendimento e prioridade vêm do servidor. Se a tela precisa de um dado que a API não manda, **pare e proponha a mudança no servidor** (domínio puro + teste), não calcule no Vue.
+- Dinheiro chega em centavos e é formatado com `reais()` de `~/utils/moeda`. Nunca `toFixed` na tela.
+- Dados fictícios. CPF sempre `cpfMascarado`.
+
+## Tokens
+
+- Cores só pelos nomes do Nuxt UI: `primary` (moss), `secondary` (marfim), `success` (folha), `error` (tijolo), `warning` (caqui), `neutral` (salvia). Utilitários de texto: `text-highlighted`, `text-default`, `text-muted`, `text-dimmed`. Fundo: `bg-default`, `bg-muted`, `bg-elevated`. Borda: `border-default`.
+- **Proibido** em componentes: hex, `slate-*`, `emerald-*`, `orange-*`, `bg-white`, `text-gray-*`. Escalas da marca (`bg-marfim-300`, `text-moss-900`) só para superfície de marca.
+- Laranja (`warning`/`caqui`) é acento e "em andamento". Nunca botão primário, nunca sucesso, nunca texto abaixo de 24px fora do tom 700.
+- Tipografia: títulos `h1`/`h2`/`h3` saem em Manrope pelo CSS. Escala: Display 48/56, H1 36/44, H2 28/36, H3 22/30, corpo 16/24 (`text-base`) ou 14/22 (`text-sm`), legenda 12/18 (`text-xs`) só para informação não crítica. Valores em R$ com `tabular-nums`.
+- Separação por espaço e fundo, não por borda. `UCard` com `variant="soft"` ou `variant="outline"` conforme o Figma; sem sombra decorativa.
+
+## Componentes: Figma → código
+
+| Figma (página 03) | Código |
+| --- | --- |
+| Button (Primary/Secondary/Tertiary/Destructive/Link) | `UButton` color `primary`/`neutral` variant `solid`/`outline`/`ghost`, `color="error"`, `variant="link"` |
+| Input (Text, Currency) | `UFormField` + `UInput` (rótulo sempre visível; moeda com `inputmode="decimal"`) |
+| Badge/Status | `UBadge` variant `subtle` + ícone; texto sempre explícito |
+| Feedback/Alert | `UAlert` variant `subtle`; segurança com `color="error"` e `role="alert"` |
+| Controls/PrivacyToggle | `UButton` ghost com `aria-pressed`, texto "Ocultar valores" / "Mostrar valores" |
+| Navigation/BottomNavItem, SidebarItem | `AppMenu` (item ativo com `aria-current="page"`, fundo `bg-marfim-300`) |
+| DataDisplay/FinancialOverview | `ResumoPatrimonio.vue` (novo) |
+| DataDisplay/HoldingRow | `PosicaoCard.vue` (ajustar) |
+| DataDisplay/AllocationBreakdown | `AlocacaoBarra.vue` (novo; percentuais e totais vêm do servidor) |
+| "Em andamento" (Home) | `EmAndamentoCard.vue` (novo) |
+| Chat/Message | `ChatMensagem.vue` (ajustar) |
+| Chat/SourceChip | `FonteChip.vue` (novo) ou `UBadge` neutral outline "Fonte: KB-006" |
+| Chat/Feedback | `RespostaAjudou.vue` (novo) |
+| Chat/Handoff | `TransferenciaCard.vue` (novo) |
+| Support/EntryPoint | `UButton`/`UCard` com disponibilidade real (`humanoDisponivel`) |
+
+Ícones: `i-lucide-*` (já instalado).
+
+## Acessibilidade (WCAG 2.2 AA)
+
+- Texto 4,5:1; limite de campo e ícone essencial 3:1. Não use `text-dimmed` para informação.
+- Rótulo visível em todo campo; placeholder não é rótulo.
+- Status, seleção e erro com texto e ícone, nunca só cor.
+- Botão só com ícone tem `aria-label`. Mensagens novas em região `aria-live="polite"`; alerta de golpe com `role="alert"`.
+- Alvo de toque mínimo 44×44 no mobile (`size="lg"` em ações principais).
+- O botão "Letra grande" continua funcionando: tudo em `rem`.
+
+## Texto
+
+- Nunca "Seu patrimônio está rendendo bem". Use "Veja como seu patrimônio mudou."
+- Todo valor diz se é bruto ou líquido. Toda informação factual mostra a fonte.
+- Conteúdo educativo leva "Conteúdo educativo, não é recomendação".
+- "Falar com uma pessoa" visível em toda tela de cliente.

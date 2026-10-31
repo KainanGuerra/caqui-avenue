@@ -1,24 +1,144 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-/* Laranja-caqui: o 600 (#c4521b) é a cor da marca; o texto branco sobre ele passa de 4,5:1. */
+/*
+  Identidade Caqui (Design System v0.4, Figma: https://www.figma.com/design/tl9FFynv0PPlTdnLkGVPPb).
+  As âncoras vêm da marca: moss-900 #0B2B18, marfim-300 #DDD2B7, moss-300 #82A591 (leafy), caqui-500 #D95E00.
+  Os tons intermediários de cada escala são derivados para o Nuxt UI e não foram validados com a marca: só as âncoras são da IDV.
+  Contraste no branco (WCAG): moss-900 15,3:1 · salvia-500 5,0:1 · folha-600 5,3:1 · tijolo-600 5,7:1 · caqui-700 6,8:1.
+*/
 @theme static {
-  --color-caqui-50: #fef5ee;
-  --color-caqui-100: #fbe9dd;
-  --color-caqui-200: #f6cfb5;
-  --color-caqui-300: #efae85;
-  --color-caqui-400: #e68551;
-  --color-caqui-500: #dc6a2c;
-  --color-caqui-600: #c4521b;
-  --color-caqui-700: #a23f16;
-  --color-caqui-800: #843418;
-  --color-caqui-900: #6c2e17;
-  --color-caqui-950: #3a1509;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  /* Primária: Deep Moss. Ação principal, seleção, item ativo. */
+  --color-moss-50: #EEF4F0;
+  --color-moss-100: #D6E5DB;
+  --color-moss-200: #ADCBB8;
+  --color-moss-300: #82A591;
+  --color-moss-400: #5B8670;
+  --color-moss-500: #3E6A53;
+  --color-moss-600: #2A543F;
+  --color-moss-700: #1C412F;
+  --color-moss-800: #133522;
+  --color-moss-900: #0B2B18;
+  --color-moss-950: #061A0E;
+
+  /* Neutros esverdeados da v0.4 (neutral.50 a neutral.900). */
+  --color-salvia-50: #FAFAF7;
+  --color-salvia-100: #F4F5F0;
+  --color-salvia-200: #E5E7E1;
+  --color-salvia-300: #CDD3CA;
+  --color-salvia-400: #9BA69C;
+  --color-salvia-500: #66736B;
+  --color-salvia-600: #4D5B52;
+  --color-salvia-700: #35473B;
+  --color-salvia-800: #24342A;
+  --color-salvia-900: #17251D;
+  --color-salvia-950: #0D1611;
+
+  /* Ivory: superfície de marca (card "Em andamento", item ativo, avatar). Nunca texto. */
+  --color-marfim-50: #FAF8F2;
+  --color-marfim-100: #F3EEE2;
+  --color-marfim-200: #E9E1CD;
+  --color-marfim-300: #DDD2B7;
+  --color-marfim-400: #CBBB96;
+  --color-marfim-500: #B8A477;
+  --color-marfim-600: #9C875B;
+  --color-marfim-700: #7D6C49;
+  --color-marfim-800: #5F523A;
+  --color-marfim-900: #463D2C;
+  --color-marfim-950: #29231A;
+
+  /* Osmanthus Orange: acento e "em andamento". Laranja não é sucesso nem botão primário. */
+  --color-caqui-50: #FDF3EA;
+  --color-caqui-100: #FBEBDD;
+  --color-caqui-200: #F6C59A;
+  --color-caqui-300: #EFA05F;
+  --color-caqui-400: #E67D2B;
+  --color-caqui-500: #D95E00;
+  --color-caqui-600: #B84F00;
+  --color-caqui-700: #974100;
+  --color-caqui-800: #7A3500;
+  --color-caqui-900: #612A00;
+  --color-caqui-950: #361700;
+
+  /* Feedback da v0.4: success #247A4B e danger #B63C35 como tom 600. */
+  --color-folha-50: #E7F2EB;
+  --color-folha-100: #CFE6D7;
+  --color-folha-200: #A3CFB2;
+  --color-folha-300: #6FB389;
+  --color-folha-400: #449563;
+  --color-folha-500: #2E8553;
+  --color-folha-600: #247A4B;
+  --color-folha-700: #1D633D;
+  --color-folha-800: #174E30;
+  --color-folha-900: #123D26;
+  --color-folha-950: #0A2316;
+
+  --color-tijolo-50: #F8E7E6;
+  --color-tijolo-100: #F1CFCD;
+  --color-tijolo-200: #E3A19C;
+  --color-tijolo-300: #D4746D;
+  --color-tijolo-400: #C65750;
+  --color-tijolo-500: #BF4840;
+  --color-tijolo-600: #B63C35;
+  --color-tijolo-700: #93302A;
+  --color-tijolo-800: #74261F;
+  --color-tijolo-900: #5A1E18;
+  --color-tijolo-950: #330F0B;
 }
 
-/* O padrão do Nuxt UI usa o 500 no claro, que não dá contraste com texto branco: sobe para 600. */
-:root { --ui-primary: var(--ui-color-primary-600); }
-.dark { --ui-primary: var(--ui-color-primary-400); }
+/*
+  O Nuxt UI usa o tom 500 por padrão no claro. Aqui cada cor sobe para o tom que passa 4,5:1 com texto,
+  e os textos e bordas que falhariam são corrigidos (decisões do Figma sobre a v0.4).
+*/
+:root {
+  --ui-primary: var(--ui-color-primary-900);
+  --ui-success: var(--ui-color-success-600);
+  --ui-error: var(--ui-color-error-600);
+  --ui-warning: var(--ui-color-warning-700);
+  --ui-info: var(--ui-color-info-700);
+
+  --ui-bg: var(--color-salvia-50);
+  --ui-bg-muted: var(--color-salvia-100);
+  --ui-bg-elevated: var(--color-salvia-100);
+  --ui-text: var(--color-salvia-900);
+  --ui-text-highlighted: var(--color-salvia-900);
+  --ui-text-toned: var(--color-salvia-700);
+  --ui-text-muted: var(--color-salvia-500);   /* 5,0:1 */
+  --ui-text-dimmed: var(--color-salvia-500);  /* o padrão (400) dá 2,5:1: não serve nem para placeholder */
+  --ui-border: var(--color-salvia-200);       /* divisor decorativo */
+  --ui-border-accented: var(--color-salvia-500); /* limite de campo: 5,0:1 (WCAG 1.4.11) */
+  --ui-radius: 0.375rem;
+}
+
+/* Escuro: a v0.4 só reserva o modo. Estes valores mantêm a Kaki legível, mas não foram desenhados. */
+.dark {
+  --ui-primary: var(--ui-color-primary-300);
+  --ui-success: var(--ui-color-success-300);
+  --ui-error: var(--ui-color-error-300);
+  --ui-warning: var(--ui-color-warning-300);
+  --ui-bg: var(--color-salvia-950);
+  --ui-bg-muted: var(--color-salvia-900);
+  --ui-bg-elevated: var(--color-salvia-900);
+  --ui-text: var(--color-salvia-50);
+  --ui-text-highlighted: var(--color-salvia-50); /* o :root acima vence o .dark do Nuxt UI (camada theme): sem isto fica salvia-900 no escuro */
+  --ui-text-toned: var(--color-salvia-200);   /* mesmo motivo: sem isto o texto secundário do card marfim fica salvia-700 no escuro */
+  --ui-text-muted: var(--color-salvia-400);   /* 7,3:1 no salvia-950 */
+  --ui-text-dimmed: var(--color-salvia-400);
+  --ui-border: var(--color-salvia-800);
+  --ui-border-accented: var(--color-salvia-400);
+}
+
+/* Títulos na Manrope; interface, textos e dados na Inter. */
+h1, h2, h3, .font-heading { font-family: var(--font-heading); letter-spacing: -0.01em; }
+
+/* Dinheiro alinha por coluna. */
+.tabular-nums, [data-valor] { font-variant-numeric: tabular-nums; }
+
+/* Foco: anel escuro com folga, visível sobre marfim, branco e vermelho. */
+:focus-visible { outline: 2px solid var(--ui-text-highlighted); outline-offset: 2px; }
 
 /* Letra grande (pessoa idosa): escala a raiz, e tudo em rem acompanha. */
 html { font-size: 16px; }
@@ -26,3 +146,7 @@ html.letra-grande { font-size: 20px; }
 
 /* Rolagem do chat não puxa a página. */
 .rolagem-chat { overscroll-behavior: contain; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

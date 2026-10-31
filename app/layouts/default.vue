@@ -14,6 +14,9 @@ const rota = useRoute()
 const versao = `v${useRuntimeConfig().public.appVersion}`
 
 const entrou = computed(() => acesso.papel.value !== null)
+// Páginas com `preencherAltura` (a conversa) ocupam exatamente o espaço entre topo e rodapé e rolam por dentro.
+const preencheAltura = computed(() => rota.meta.preencherAltura === true)
+const alturaFixa = computed(() => !entrou.value || preencheAltura.value)
 const larga = import.meta.client ? window.matchMedia(DESKTOP) : null
 const desktop = ref(larga?.matches ?? true)
 const gaveta = ref(false)
@@ -46,13 +49,13 @@ const rotuloTema = computed(() => ({ light: 'Tema claro', mixed: 'Tema misto (to
 
 <template>
   <!-- --menu-w é a largura da coluna do menu, para barras fixas das páginas começarem onde a página começa.
-       Topo e rodapé são fixos em todas as telas. A tela de entrada nunca rola: é exatamente o espaço entre eles. -->
-  <div class="flex flex-col bg-slate-50 dark:bg-slate-950" :class="entrou ? 'min-h-dvh' : 'h-dvh overflow-hidden'" :style="{ '--menu-w': entrou && desktop && colunaAberta ? '15rem' : '0px' }">
-    <header class="fixed inset-x-0 top-0 z-30 h-14 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90" :class="{ dark: cromoEscuro }">
+       Topo e rodapé são fixos em todas as telas. A entrada e a conversa nunca rolam a página: ocupam exatamente o espaço entre eles. -->
+  <div class="flex flex-col bg-muted" :class="alturaFixa ? 'h-dvh overflow-hidden' : 'min-h-dvh'" :style="{ '--menu-w': entrou && desktop && colunaAberta ? '15rem' : '0px' }">
+    <header class="fixed inset-x-0 top-0 z-30 h-14 border-b border-default bg-default/90 backdrop-blur" :class="{ dark: cromoEscuro }">
       <div class="flex h-full items-center justify-between gap-3 px-4">
         <div class="flex items-center gap-2">
           <UButton v-if="entrou" color="neutral" variant="ghost" icon="i-lucide-menu" :aria-label="menuVisivel ? 'Fechar o menu' : 'Abrir o menu'" :aria-expanded="menuVisivel" @click="alternarMenu" />
-          <NuxtLink to="/" class="text-slate-900 dark:text-white" aria-label="Caqui Invest, página inicial"><AppLogo /></NuxtLink>
+          <NuxtLink to="/" class="text-highlighted" aria-label="Caqui Invest, página inicial"><AppLogo /></NuxtLink>
           <UBadge v-if="!entrou" color="neutral" variant="subtle" size="sm">{{ versao }}</UBadge>
         </div>
         <div class="flex items-center gap-1 text-sm">
@@ -64,7 +67,7 @@ const rotuloTema = computed(() => ({ light: 'Tema claro', mixed: 'Tema misto (to
           </UTooltip>
           <template v-if="entrou">
             <UAvatar :text="iniciais(acesso.nome.value)" size="sm" :alt="acesso.nome.value" class="ml-1" />
-            <span class="hidden max-w-40 truncate text-slate-600 sm:inline dark:text-slate-300">{{ acesso.nome.value }}<span v-if="acesso.papel.value === 'suporte'" class="text-slate-400"> · suporte</span></span>
+            <span class="hidden max-w-40 truncate text-default sm:inline">{{ acesso.nome.value }}<span v-if="acesso.papel.value === 'suporte'" class="text-muted"> · suporte</span></span>
             <UTooltip text="Sair">
               <UButton color="neutral" variant="ghost" icon="i-lucide-log-out" aria-label="Sair" @click="chat.sair()" />
             </UTooltip>
@@ -76,28 +79,28 @@ const rotuloTema = computed(() => ({ light: 'Tema claro', mixed: 'Tema misto (to
     <!-- O menu sempre começa sob o topo, para o botão ficar à vista: coluna ao lado da página em telas largas, gaveta nas estreitas. -->
     <aside
       v-if="entrou"
-      class="fixed bottom-11 left-0 top-14 z-[25] flex w-60 flex-col overflow-y-auto border-r border-slate-200 bg-white p-3 transition-transform duration-200 dark:border-slate-800 dark:bg-slate-900"
+      class="fixed bottom-11 left-0 top-14 z-[25] flex w-60 flex-col overflow-y-auto border-r border-default bg-default p-3 transition-transform duration-200"
       :class="[{ dark: cromoEscuro }, menuVisivel ? 'translate-x-0' : '-translate-x-full']"
       aria-label="Menu principal"
       :inert="!menuVisivel"
       @keydown.esc="gaveta = false"
     >
       <AppMenu :itens="itens" />
-      <p class="mt-auto pt-4 text-center text-xs text-slate-400 dark:text-slate-500">Kaki {{ versao }}</p>
+      <p class="mt-auto pt-4 text-center text-xs text-muted">Kaki {{ versao }}</p>
     </aside>
     <div v-if="entrou && !desktop && gaveta" class="fixed inset-x-0 bottom-11 top-14 z-10 bg-black/40" aria-hidden="true" @click="gaveta = false" />
 
     <div class="flex min-h-0 flex-1 flex-col pb-11 pt-14 transition-[padding] duration-200" :class="{ 'md:pl-60': entrou && colunaAberta }">
-      <UContainer class="w-full flex-1 py-4" :class="entrou ? 'pb-8' : 'overflow-y-auto'">
+      <UContainer class="w-full flex-1 py-4" :class="preencheAltura ? 'flex min-h-0 flex-col max-sm:py-2' : entrou ? 'pb-8' : 'overflow-y-auto'">
         <ConnectionBanner class="mb-3" />
         <slot />
       </UContainer>
 
-      <footer class="fixed inset-x-0 bottom-0 z-30 h-11 border-t border-slate-200 bg-white/90 text-sm text-slate-500 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-400" :class="{ dark: cromoEscuro }">
+      <footer class="fixed inset-x-0 bottom-0 z-30 h-11 border-t border-default bg-default/90 text-sm text-muted backdrop-blur" :class="{ dark: cromoEscuro }">
         <UContainer class="flex h-full items-center justify-between gap-3">
           <span class="truncate">Kaki {{ versao }} · assistente da Caqui Invest</span>
           <span class="hidden items-center gap-1.5 sm:flex"><UIcon name="i-lucide-shield-check" class="size-4" />Dados fictícios · CPF sempre mascarado</span>
-          <span class="flex items-center gap-1.5"><span class="size-2 rounded-full bg-emerald-500" />Segurança 24h</span>
+          <span class="flex items-center gap-1.5"><span class="size-2 rounded-full bg-success" />Segurança 24h</span>
         </UContainer>
       </footer>
     </div>

@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { dataCurta, reais } from '~/utils/moeda'
-
 useHead({ title: 'Início · Kaki' })
 
 const chat = useChat()
 const acesso = useAcesso()
-// A conta vem do servidor, só do cliente da sessão. Ao voltar de outra tela ela é relida.
+// A conta vem do servidor, só do cliente da sessão, já com patrimônio, etapas, alocação e avisos. Ao voltar de outra tela ela é relida.
 onMounted(() => { void chat.carregarConta(); void chat.atualizar(); chat.acompanhar() })
 
 const conta = chat.conta
@@ -14,53 +12,69 @@ const statusCaso = computed(() => {
   const c = chat.caso.value
   return !c ? '' : c.status === 'assumido' ? `com ${c.atendente ?? 'um atendente'}` : c.status === 'resolvido' ? 'resolvido' : 'na fila'
 })
-async function pedirPessoa() {
+const casoAberto = computed(() => chat.caso.value && chat.caso.value.status !== 'resolvido')
+const disponibilidade = computed(() => (chat.humanoDisponivel.value ? 'Uma pessoa da Caqui está disponível agora.' : 'Fora do horário: a pessoa volta às 8h. Golpe e segurança, 24h.'))
+
+const PERGUNTA_RESGATE = 'Quando cai meu resgate?'
+async function perguntar(texto: string) {
   await navigateTo('/conversa')
-  await chat.enviar('Quero falar com uma pessoa')
+  await chat.enviar(texto)
 }
+const pedirPessoa = () => perguntar('Quero falar com uma pessoa')
 </script>
 
 <template>
-  <div class="space-y-4 pt-2">
-    <div class="flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 class="text-2xl font-semibold">Olá, {{ primeiroNome }}</h1>
-        <p class="text-sm text-muted">Seu resumo em {{ dataCurta('2026-11-18') }}. Valores brutos, antes do imposto de renda.</p>
+  <div class="mx-auto max-w-3xl space-y-6 pt-2">
+    <header>
+      <h1 class="text-[1.75rem] leading-9 font-semibold text-highlighted">Olá, {{ primeiroNome }}</h1>
+      <p class="text-muted">Veja como seu patrimônio mudou.</p>
+    </header>
+
+    <template v-if="conta">
+      <EmAndamentoCard v-for="op in conta.emAndamento" :key="op.operacaoId" :operacao="op" :hoje="conta.hoje" @detalhes="perguntar(PERGUNTA_RESGATE)" />
+
+      <ResumoPatrimonio :conta="conta" />
+
+      <div v-if="conta.avisos.length || casoAberto" class="space-y-3">
+        <UAlert
+          v-for="aviso in conta.avisos" :key="aviso.data"
+          color="warning" variant="subtle" icon="i-lucide-calendar-x"
+          :title="aviso.titulo" :description="`${aviso.detalhe} Fonte: ${aviso.fontes.join(' · ')}.`"
+          :ui="{ title: 'text-highlighted', description: 'text-default' }"
+          data-testid="aviso-feriado"
+        />
+        <UAlert v-if="casoAberto && chat.caso.value" color="primary" variant="subtle" icon="i-lucide-ticket" :title="`Protocolo ${chat.caso.value.protocolo}: ${statusCaso}`" description="Você não precisa repetir nada: quem atende vê a sua conversa." role="status">
+          <template #actions><UButton to="/conversa" size="sm" color="primary" variant="outline" label="Abrir conversa" /></template>
+        </UAlert>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <UButton to="/conversa" icon="i-lucide-message-circle" size="lg" label="Conversar com a Kaki" data-testid="ir-conversa" />
-        <UButton color="neutral" variant="outline" icon="i-lucide-headset" size="lg" label="Falar com uma pessoa" @click="pedirPessoa" />
+    </template>
+    <div v-else class="space-y-4"><USkeleton class="h-40" /><USkeleton class="h-48" /></div>
+
+    <section class="space-y-3" aria-labelledby="titulo-acoes">
+      <h2 id="titulo-acoes" class="text-xl font-semibold text-highlighted">O que você quer fazer?</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <AcaoRapida icone="i-lucide-arrow-up-right" titulo="Resgatar" subtitulo="Veja quando o dinheiro cai" data-testid="acao-resgatar" @click="perguntar(PERGUNTA_RESGATE)" />
+        <AcaoRapida icone="i-lucide-message-circle" titulo="Falar com uma pessoa" :subtitulo="chat.humanoDisponivel.value ? 'Disponível agora' : 'Volta às 8h'" @click="pedirPessoa" />
       </div>
-    </div>
+    </section>
 
-    <UAlert v-if="chat.caso.value && chat.caso.value.status !== 'resolvido'" color="primary" variant="subtle" icon="i-lucide-ticket" :title="`Protocolo ${chat.caso.value.protocolo}: ${statusCaso}`" description="Você não precisa repetir nada: quem atende vê a sua conversa." role="status">
-      <template #actions><UButton to="/conversa" size="sm" color="primary" variant="outline" label="Abrir conversa" /></template>
-    </UAlert>
+    <AlocacaoBarra v-if="conta?.alocacao.length" :fatias="conta.alocacao" :total-bruto-centavos="conta.totalBrutoCentavos" />
 
-    <div v-if="conta" class="grid gap-3 sm:grid-cols-3">
-      <KpiCard rotulo="Saldo em conta" :valor="reais(conta.saldoEmContaCentavos)" icone="i-lucide-wallet" />
-      <KpiCard rotulo="Total aplicado" :valor="reais(conta.totalAplicadoCentavos)" icone="i-lucide-piggy-bank" tom="neutral" />
-      <KpiCard rotulo="Saldo bruto investido" :valor="reais(conta.totalBrutoCentavos)" icone="i-lucide-trending-up" tom="success" />
-    </div>
-    <div v-else class="grid gap-3 sm:grid-cols-3"><USkeleton v-for="i in 3" :key="i" class="h-20" /></div>
-
-    <div class="grid gap-4 lg:grid-cols-5">
-      <section class="space-y-2 lg:col-span-3" aria-label="Investimentos">
-        <h2 class="text-sm font-medium text-muted">Seus investimentos</h2>
-        <div v-if="conta?.posicoes.length" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-          <PosicaoCard v-for="p in conta.posicoes" :key="p.id" :posicao="p" />
-        </div>
-        <UCard v-else-if="conta"><p class="py-4 text-center text-sm text-muted">Você ainda não tem investimentos. Pergunte à Kaki como cada produto funciona.</p></UCard>
-      </section>
-      <section class="space-y-2 lg:col-span-2" aria-label="Últimas operações">
-        <h2 class="text-sm font-medium text-muted">Últimas operações</h2>
-        <UCard>
-          <ul v-if="conta?.operacoes.length" class="-my-3 divide-y divide-default">
-            <OperacaoLinha v-for="o in conta.operacoes" :key="o.id" :operacao="o" />
-          </ul>
-          <p v-else-if="conta" class="py-4 text-center text-sm text-muted">Nenhuma operação por aqui.</p>
-        </UCard>
-      </section>
-    </div>
+    <section class="space-y-3" aria-labelledby="titulo-proximos">
+      <h2 id="titulo-proximos" class="text-xl font-semibold text-highlighted">Próximos passos</h2>
+      <UCard variant="outline" class="bg-default" :ui="{ body: 'space-y-2 sm:p-5' }" data-testid="conteudo-educativo">
+        <UBadge color="neutral" variant="subtle" icon="i-lucide-sprout">Conteúdo educativo, não é recomendação</UBadge>
+        <p class="font-semibold text-highlighted">Conheça como funciona a liquidez antes de investir.</p>
+        <p class="text-sm text-muted">Entenda quando você pode resgatar e quanto tempo o dinheiro leva para cair.</p>
+      </UCard>
+      <button type="button" class="flex w-full items-center gap-4 rounded-xl bg-marfim-300 p-5 text-left text-highlighted transition hover:bg-marfim-200 dark:bg-marfim-900 dark:hover:bg-marfim-800" data-testid="atendimento-humano" @click="pedirPessoa">
+        <UIcon name="i-lucide-message-circle" class="size-6 shrink-0" />
+        <span class="min-w-0 flex-1">
+          <span class="block font-semibold">Falar com uma pessoa</span>
+          <span class="block text-sm text-toned">{{ disponibilidade }}</span>
+        </span>
+        <UIcon name="i-lucide-chevron-right" class="size-5 shrink-0" />
+      </button>
+    </section>
   </div>
 </template>

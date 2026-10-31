@@ -56,7 +56,7 @@ async function entrarEquipe() {
 <template>
   <!-- A altura é a tela menos o topo (3,5rem), o rodapé (2,75rem) e o respiro da página (2rem): a entrada não precisa rolar. -->
   <div class="mx-auto flex min-h-[calc(100dvh-8.25rem)] max-w-xl flex-col justify-center gap-5 py-2">
-    <div class="flex justify-center text-slate-900 dark:text-white"><AppLogo empilhada :tamanho="72" /></div>
+    <div class="flex justify-center text-highlighted"><AppLogo empilhada :tamanho="72" /></div>
     <div class="text-center">
       <h1 class="text-2xl font-semibold">Quem está entrando?</h1>
       <p class="mt-1 text-sm text-muted">Entrada simulada para a demonstração: escolha uma pessoa fictícia. Não há senha de cliente.</p>

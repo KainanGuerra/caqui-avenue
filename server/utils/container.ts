@@ -1,5 +1,5 @@
 import { carregarDados, type Dados } from '../infrastructure/data/dados'
-import { criarCalendario } from '../domain/calendar'
+import { criarCalendario, type CalendarioUtil } from '../domain/calendar'
 import { CaseService } from '../application/case-service'
 import { Pipeline, type Entendimento, type Redator } from '../application/pipeline'
 import { criarRelogio, type Clock } from '../infrastructure/clock'
@@ -18,6 +18,8 @@ import { kaki, type Persona } from '../persona'
 export type Container = {
   env: Env
   dados: Dados
+  cal: CalendarioUtil
+  relogio: Clock
   sessoes: SessionStore
   casos: CaseService
   pipeline: Pipeline
@@ -41,13 +43,16 @@ export function montarContainer(o: Overrides = {}): Container {
   const porta = criarPorta(env)
   const sessoes = criarSessionStore()
   const casos = new CaseService(criarCaseStore())
+  // Um calendário e um relógio para o chat e para a Home: os dois contam o prazo a partir do mesmo "hoje".
+  const cal = criarCalendario(dados.calendario)
+  const relogio = o.clock ?? criarRelogio(env.RELOGIO)
   const pipeline = new Pipeline({
-    dados, cal: criarCalendario(dados.calendario), sessoes, casos,
+    dados, cal, sessoes, casos,
     redator: o.redator ?? (porta ? redatorLlm(porta) : redatorTemplate),
     entendimento: o.entendimento !== undefined ? o.entendimento : porta && env.UNDERSTANDING_LLM ? entendimentoLlm(porta) : null,
-    persona: o.persona ?? kaki, clock: o.clock ?? criarRelogio(env.RELOGIO), logger,
+    persona: o.persona ?? kaki, clock: relogio, logger,
   })
-  return { env, dados, sessoes, casos, pipeline, logger }
+  return { env, dados, cal, relogio, sessoes, casos, pipeline, logger }
 }
 
 let unico: Container | null = null

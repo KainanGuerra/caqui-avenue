@@ -10,7 +10,7 @@ const seguranca = computed(() => props.msg.acao === 'seguranca_imediata')
 <template>
   <div class="flex" :class="msg.papel === 'cliente' ? 'justify-end' : 'justify-start'" :data-papel="msg.papel">
     <div
-      class="max-w-[88%] whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2.5 text-sm sm:max-w-[80%]"
+      class="max-w-[88%] break-words rounded-2xl px-3.5 py-2.5 text-sm sm:max-w-[80%]"
       :class="{
         'rounded-br-sm bg-primary text-inverted': msg.papel === 'cliente',
         'rounded-bl-sm bg-default ring ring-default': msg.papel === 'agente' && !seguranca,
@@ -19,7 +19,8 @@ const seguranca = computed(() => props.msg.acao === 'seguranca_imediata')
       }"
     >
       <span class="mb-0.5 block text-xs font-semibold" :class="msg.papel === 'cliente' ? 'text-inverted/80' : 'text-muted'">{{ quem }}<template v-if="rotulo"> · {{ rotulo }}</template></span>
-      {{ msg.texto }}
+      <!-- pre-wrap só no texto, numa linha: a indentação do template não vira espaço no balão. -->
+      <p class="whitespace-pre-wrap">{{ msg.texto }}</p>
       <div v-if="msg.fontes?.length || msg.protocolo" class="mt-2 flex flex-wrap gap-1.5" aria-label="Fontes e protocolo desta resposta">
         <UBadge v-for="f in msg.fontes" :key="f.id" color="info" variant="subtle" size="sm" :title="f.rotulo" icon="i-lucide-book-open-text">Fonte: {{ f.rotulo }}</UBadge>
         <UBadge v-if="msg.protocolo" color="primary" variant="subtle" size="sm" icon="i-lucide-ticket">Protocolo {{ msg.protocolo }}</UBadge>

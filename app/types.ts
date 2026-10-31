@@ -58,12 +58,37 @@ export type OperacaoVista = {
   nomeProduto: string | null
 }
 
+export type EstadoEtapa = 'feito' | 'atual' | 'proximo'
+export type Etapa = { titulo: string; detalhe: string; data: string; hora: string | null; estado: EstadoEtapa }
+
+export type OperacaoEmAndamento = {
+  operacaoId: string
+  tipo: 'aplicacao' | 'resgate'
+  valorCentavos: number
+  nomeProduto: string
+  liquidacaoPrevista: string | null
+  etapas: Etapa[]
+  fontes: string[]
+}
+
+export type FatiaAlocacao = { classe: 'renda_fixa' | 'renda_variavel'; rotulo: string; centavos: number; percentual: number }
+
+export type Aviso = { data: string; titulo: string; detalhe: string; fontes: string[] }
+
 export type ContaVista = {
+  hoje: string
+  atualizadoEm: string
   saldoEmContaCentavos: number
   totalAplicadoCentavos: number
   totalBrutoCentavos: number
+  patrimonioCentavos: number
+  resultadoCentavos: number
+  resultadoPercentual: number
   posicoes: PosicaoVista[]
   operacoes: OperacaoVista[]
+  emAndamento: OperacaoEmAndamento[]
+  alocacao: FatiaAlocacao[]
+  avisos: Aviso[]
 }
 
 export type ResumoFila = { emAberto: number; golpe: number; prioridade: number; assumidos: number; resolvidos: number }

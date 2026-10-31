@@ -8,7 +8,7 @@ A fonte das regras é `../../caqui-invest/CASE.md` (pasta só de consulta) e os 
 
 - **Etiquetas:** `@regra-N` liga o cenário à regra do case; `@PT-xx` liga à pergunta de teste de mesmo id; `@transversal` marca o que vale para todas as regras (sessão, política, entrega, redação); `@premissa` marca o que depende de uma decisão ainda aberta e precisa ser confirmado na SPEC antes de virar teste.
 - **Ações** seguem o vocabulário do case: `responder`, `encaminhar_humano`, `encaminhar_especialista`, `seguranca_imediata`, `protocolo`, `recusar`.
-- **Relógio e cliente** ficam no `Contexto` ou no `Dado` ("agora é 18/11/2026 às 10h", "o cliente da sessão é C-0001"). Não há passos de tela.
+- **Relógio e cliente** ficam no `Contexto` ou no `Dado` ("agora é 18/11/2026 às 10h", "o cliente da sessão é C-0001"). Não há passos de tela, salvo em `home.feature`, que descreve a Home: lá os passos de tela só exibem o que o servidor devolveu.
 - **Falas do cliente** ficam literais, entre aspas, em português.
 - Além dos cenários espelhados nas 40 perguntas, cada regra tem **variações adversariais** (paráfrase, caixa alta, acento faltando, insistência).
 
@@ -22,6 +22,7 @@ A fonte das regras é `../../caqui-invest/CASE.md` (pasta só de consulta) e os 
 | [`dados-pessoais.feature`](dados-pessoais.feature) | Dados pessoais protegidos | 10 | PT-32, PT-33 | 6 |
 | [`entrega-ao-humano.feature`](entrega-ao-humano.feature) | Entrega ao humano sem repetição | transversal | sem PT (variações e regras transversais) | 14 |
 | [`golpe.feature`](golpe.feature) | Suspeita de golpe interrompe o fluxo | 5 | PT-18, PT-19, PT-20, PT-21 | 5 |
+| [`home.feature`](home.feature) | Home do cliente | 1, 4, 10, 12 | sem PT (variações e regras transversais) | 14 |
 | [`horario-de-atendimento.feature`](horario-de-atendimento.feature) | Horário de atendimento humano | 12 | PT-37, PT-38 | 5 |
 | [`imposto-de-renda.feature`](imposto-de-renda.feature) | Imposto de renda regressivo na renda fixa | 2 | PT-06, PT-07, PT-08, PT-09 | 7 |
 | [`instrucao-escondida.feature`](instrucao-escondida.feature) | Instrução escondida na conversa | 11 | PT-34, PT-35, PT-36 | 5 |
