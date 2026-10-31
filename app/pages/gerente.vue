@@ -113,6 +113,15 @@ const filtroStatus = computed({
         </div>
       </section>
 
+      <!-- Sentimento: suposição a partir das ações e motivos já registrados; nada é gravado por cliente. -->
+      <section class="space-y-3" aria-labelledby="sentimento">
+        <div>
+          <h2 id="sentimento" class="text-lg font-semibold">Sentimento estimado</h2>
+          <p class="text-sm text-muted">Suposição por conversa, a partir do que aconteceu nela. Não é gravado por cliente nem lido do texto: aparece só aqui, somado.</p>
+        </div>
+        <SentimentoPainel :dados="p.sentimento" />
+      </section>
+
       <!-- 5. Custos e latência -->
       <section class="space-y-3" aria-labelledby="custos">
         <h2 id="custos" class="text-lg font-semibold">Custos e latência</h2>
@@ -122,13 +131,6 @@ const filtroStatus = computed({
           <KpiCard rotulo="Custo estimado" :valor="reais(p.custo.totalCentavos)" icone="i-lucide-wallet" dica="Desde que o servidor subiu" />
           <KpiCard rotulo="Custo em escala" :valor="p.custo.porMilConversasCentavos === null ? '—' : reais(p.custo.porMilConversasCentavos)" icone="i-lucide-calculator" dica="Projeção para cada mil conversas" />
         </div>
-        <UAlert color="neutral" variant="subtle" icon="i-lucide-info" :title="p.redacao === 'template' ? 'Modo template: sem IA, custo zero.' : 'Custo estimado, não faturado.'">
-          <template #description>
-            Tokens estimados pelo tamanho do texto (cerca de 4 caracteres por token), vezes o preço por milhão de tokens do <code>.env</code>
-            (<code>LLM_PRECO_ENTRADA_BRL_MTOK</code> e <code>LLM_PRECO_SAIDA_BRL_MTOK</code>).
-            <template v-if="p.redacao !== 'template' && !p.custo.precoConfigurado"> O preço não está configurado, então o custo aparece zerado.</template>
-          </template>
-        </UAlert>
       </section>
     </template>
   </div>

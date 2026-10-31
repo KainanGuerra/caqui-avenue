@@ -4,7 +4,7 @@ Agente de atendimento para o Hands On com IA (31/10/2026): **o código decide, o
 
 - **Visão do cliente** (`/`): escolhe um cliente simulado e conversa com a Kaki. Fonte em cada resposta factual, pessoa oferecida quando a Kaki não resolve (e numa linha discreta do Atendimento), protocolo à vista, letra grande, simulador de horário.
 - **Visão do suporte** (`/suporte`): fila ordenada (golpe, 60 anos ou mais, demais), motivos da decisão, resumo, fontes, conversa; assumir, responder e resolver. A resposta aparece no chat do cliente.
-- **Visão do gerente** (`/gerente`): volume de atendimentos, resolução automática, conversas escalonadas, qualidade das respostas, custo estimado e latência da Kaki ao vivo, com a lista de casos paginada (D19).
+- **Visão do gerente** (`/gerente`): volume de atendimentos, resolução automática, conversas escalonadas, qualidade das respostas, sentimento estimado (D20), custo estimado e latência da Kaki ao vivo, com a lista de casos paginada (D19).
 
 Spec: [SPEC.md](SPEC.md) · Decisões: [DECISIONS.md](DECISIONS.md) · BDD: [documentation/bdd](documentation/bdd/README.md) · Jornada: [documentation/JORNADA_DO_USUARIO.pdf](documentation/JORNADA_DO_USUARIO.pdf)
 

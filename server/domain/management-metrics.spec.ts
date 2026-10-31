@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Caso } from './case-summary'
-import { contar, paginarCasos, resumirAoVivo, tokensEstimados, type RegistroLlm, type RegistroResposta } from './management-metrics'
+import { contar, distribuirSentimentos, inferirSentimento, paginarCasos, resumirAoVivo, tokensEstimados, type RegistroLlm, type RegistroResposta } from './management-metrics'
 
 const resposta = (sessaoId: string, extra: Partial<RegistroResposta> = {}): RegistroResposta => ({
   em: '2026-11-18T10:00:00-03:00', sessaoId, acao: 'responder', motivos: [], redacao: 'template', comFonte: true, naoEntendeu: false, ms: 10, ...extra,
@@ -125,5 +125,59 @@ describe('lista de casos paginada', () => {
     expect(paginarCasos(muitos, { pagina: 99, status: null }).pagina).toBe(3)
     expect(paginarCasos(muitos, { pagina: 0, status: null }).pagina).toBe(1)
     expect(paginarCasos([], { pagina: 2, status: null })).toEqual({ itens: [], total: 0, pagina: 1, paginas: 1 })
+  })
+})
+
+describe('sentimento estimado', () => {
+  it('golpe ou vulnerável: preocupado, mesmo com reclamação na mesma conversa', () => {
+    expect(inferirSentimento([resposta('s', { acao: 'seguranca_imediata', motivos: ['GOLPE_CREDENCIAL'] })])).toBe('preocupado')
+    expect(inferirSentimento([resposta('s', { motivos: ['VULNERAVEL_PRESSAO'] }), resposta('s', { motivos: ['RECLAMACAO'] })])).toBe('preocupado')
+  })
+
+  it('reclamação ou cancelamento: insatisfeito, mesmo que a Kaki não tenha entendido', () => {
+    expect(inferirSentimento([resposta('s', { acao: 'protocolo', motivos: ['RECLAMACAO'] })])).toBe('insatisfeito')
+    expect(inferirSentimento([resposta('s', { naoEntendeu: true }), resposta('s', { motivos: ['CANCELAMENTO'] })])).toBe('insatisfeito')
+  })
+
+  it('um "não entendi" ou conversa travada: frustrado', () => {
+    expect(inferirSentimento([resposta('s'), resposta('s', { naoEntendeu: true, comFonte: false })])).toBe('frustrado')
+    expect(inferirSentimento([resposta('s', { acao: 'encaminhar_humano', motivos: ['PASSOS_MAX'] })])).toBe('frustrado')
+  })
+
+  it('respondida pela Kaki com fonte e sem escalonar: satisfeito; sem fonte nenhuma não conta', () => {
+    expect(inferirSentimento([resposta('s'), resposta('s', { comFonte: false })])).toBe('satisfeito')
+    expect(inferirSentimento([resposta('s', { comFonte: false })])).toBe('neutro')
+  })
+
+  it('pediu uma pessoa ou especialista, sem outro sinal: neutro', () => {
+    expect(inferirSentimento([resposta('s', { acao: 'encaminhar_humano', motivos: ['HUMANO_PEDIDO'] })])).toBe('neutro')
+    expect(inferirSentimento([resposta('s', { acao: 'encaminhar_especialista', motivos: ['RECOMENDACAO_PRODUTO'] })])).toBe('neutro')
+  })
+
+  it('distribui por conversa, e não por mensagem, sempre nas cinco categorias e na mesma ordem, positivo primeiro', () => {
+    const d = distribuirSentimentos([
+      resposta('a'), resposta('a'), resposta('a'),
+      resposta('b', { acao: 'seguranca_imediata', motivos: ['GOLPE_RELATO'] }),
+    ])
+    expect(d.conversas).toBe(2)
+    expect(d.categorias.map((x) => [x.chave, x.total, x.pct])).toEqual([['satisfeito', 1, 50], ['neutro', 0, 0], ['preocupado', 1, 50], ['insatisfeito', 0, 0], ['frustrado', 0, 0]])
+    expect(d.categorias[2]!.criterio).toBe('Sinal de golpe ou de cliente vulnerável')
+  })
+
+  it('agrupa em positivo, neutro e negativo, nessa ordem, para a barra', () => {
+    const d = distribuirSentimentos([
+      resposta('a'),
+      resposta('b', { acao: 'seguranca_imediata', motivos: ['GOLPE_RELATO'] }),
+      resposta('c', { acao: 'protocolo', motivos: ['RECLAMACAO'] }),
+      resposta('d', { acao: 'encaminhar_humano', motivos: ['HUMANO_PEDIDO'] }),
+    ])
+    expect(d.polaridades.map((p) => [p.chave, p.total, p.pct])).toEqual([['positivo', 1, 25], ['neutro', 1, 25], ['negativo', 2, 50]])
+  })
+
+  it('sem conversa, tudo zerado e as categorias continuam lá', () => {
+    const d = distribuirSentimentos([])
+    expect(d.conversas).toBe(0)
+    expect([...d.categorias, ...d.polaridades].every((x) => x.total === 0 && x.pct === 0)).toBe(true)
+    expect(d.polaridades).toHaveLength(3)
   })
 })

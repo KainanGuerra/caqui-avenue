@@ -67,11 +67,29 @@ Funcionalidade: Painel do gerente
     Quando o gerente abre o painel
     Então "Respostas da IA barradas" mostra "—"
 
+  Cenário: Sentimento estimado por conversa, só no painel
+    Dado que C-0002 só perguntou o horário de corte e foi respondido com fonte
+    E que C-0001 disse "ligaram da segurança pedindo minha senha"
+    E que C-0003 disse "quero reclamar do atendimento"
+    Quando o gerente abre o painel
+    Então o sentimento estimado mostra 1 satisfeito, 1 preocupado e 1 insatisfeito
+    E cada categoria mostra o critério que a define
+
+  Cenário: A regra mais forte vence quando a conversa tem mais de um sinal
+    Dado uma conversa com sinal de cliente vulnerável e uma reclamação
+    Quando o gerente abre o painel
+    Então a conversa conta como preocupado, e não como insatisfeito
+
+  Cenário: O sentimento não é gravado por cliente
+    Quando o gerente abre o painel
+    Então o sentimento aparece só somado, sem nome de cliente
+    E nenhum sentimento é guardado no caso, na sessão ou no histórico
+
   Cenário: No modo template não há custo
     Dado que LLM_PROVIDER é template
     Quando o gerente abre o painel
     Então chamadas ao LLM, tokens e custo aparecem zerados
-    E o aviso diz que o modo template não usa LLM
+    E o card de respostas da IA barradas diz que a IA está desligada
 
   Cenário: Custo estimado pelo tamanho do texto
     Dado que o preço é R$ 15 por milhão de tokens de entrada e R$ 75 de saída

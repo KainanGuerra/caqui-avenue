@@ -12,6 +12,8 @@ flowchart TD
     C --> E
     E --> G["resumirAoVivo"]
     G --> H["Volume, resolução automática,<br/>escalonadas, qualidade,<br/>custo e latência"]
+    G --> S["Sentimento estimado por conversa<br/>regra mais forte vence<br/>só o total, nada gravado"]
+    S --> I
     G --> J["Casos: 10 por página,<br/>mais novo primeiro,<br/>filtro por status"]
     H --> I["Tela exibe cartões,<br/>barras e a lista paginada"]
     J --> I

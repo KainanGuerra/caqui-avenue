@@ -78,12 +78,63 @@ export function paginarCasos(casos: Caso[], filtro: FiltroCasos, porPagina = CAS
   return { itens, total: filtrados.length, pagina, paginas }
 }
 
+// Sentimento estimado: uma suposição por conversa a partir do que já está registrado (ação, motivos, entendimento).
+// Nada é gravado por cliente nem lido do texto; o painel mostra só o total. A primeira regra que bate vence.
+export type Sentimento = 'preocupado' | 'insatisfeito' | 'frustrado' | 'satisfeito' | 'neutro'
+/** Polaridade do sentimento: a escala da barra divergente (negativo, neutro, positivo). */
+export type Polaridade = 'negativo' | 'neutro' | 'positivo'
+export type ContagemSentimento = Contagem & { chave: Sentimento; criterio: string; polaridade: Polaridade }
+export type ContagemPolaridade = Contagem & { chave: Polaridade }
+export type ResumoSentimento = { conversas: number; polaridades: ContagemPolaridade[]; categorias: ContagemSentimento[] }
+
+// Ordem de exibição: positivo primeiro (a ordem de prioridade da inferência está em inferirSentimento).
+const SENTIMENTOS: { chave: Sentimento; rotulo: string; criterio: string; polaridade: Polaridade }[] = [
+  { chave: 'satisfeito', rotulo: 'Satisfeito', criterio: 'Respondido pela Kaki com fonte, sem escalonar', polaridade: 'positivo' },
+  { chave: 'neutro', rotulo: 'Neutro', criterio: 'Pediu uma pessoa, especialista ou protocolo', polaridade: 'neutro' },
+  { chave: 'preocupado', rotulo: 'Preocupado', criterio: 'Sinal de golpe ou de cliente vulnerável', polaridade: 'negativo' },
+  { chave: 'insatisfeito', rotulo: 'Insatisfeito', criterio: 'Reclamação ou pedido de cancelamento', polaridade: 'negativo' },
+  { chave: 'frustrado', rotulo: 'Frustrado', criterio: 'A Kaki não entendeu alguma mensagem ou a conversa travou', polaridade: 'negativo' },
+]
+const POLARIDADES: { chave: Polaridade; rotulo: string }[] = [
+  { chave: 'positivo', rotulo: 'Positivo' }, { chave: 'neutro', rotulo: 'Neutro' }, { chave: 'negativo', rotulo: 'Negativo' },
+]
+
+/** Uma conversa (as respostas de uma sessão) vira um sentimento provável. */
+export function inferirSentimento(respostas: RegistroResposta[]): Sentimento {
+  const motivos = respostas.flatMap((r) => r.motivos)
+  if (respostas.some((r) => r.acao === 'seguranca_imediata') || motivos.some((m) => m.startsWith('GOLPE') || m.startsWith('VULNERAVEL'))) return 'preocupado'
+  if (motivos.includes('RECLAMACAO') || motivos.includes('CANCELAMENTO')) return 'insatisfeito'
+  if (respostas.some((r) => r.naoEntendeu) || motivos.some((m) => MOTIVOS_DE_TRAVA.includes(m))) return 'frustrado'
+  if (respostas.length && respostas.every((r) => r.acao === 'responder') && respostas.some((r) => r.comFonte)) return 'satisfeito'
+  return 'neutro'
+}
+
+/** Distribuição por conversa, na ordem fixa, positivo primeiro (a tela não reordena nem some com a que está zerada):
+ *  as três polaridades, para a barra, e as cinco categorias, para o detalhe. */
+export function distribuirSentimentos(respostas: RegistroResposta[]): ResumoSentimento {
+  const porSessao = new Map<string, RegistroResposta[]>()
+  for (const r of respostas) porSessao.set(r.sessaoId, [...(porSessao.get(r.sessaoId) ?? []), r])
+  const sentimentos = [...porSessao.values()].map(inferirSentimento)
+  const conversas = sentimentos.length
+  const categorias = SENTIMENTOS.map((s) => {
+    const total = sentimentos.filter((x) => x === s.chave).length
+    return { ...s, total, pct: pct(total, conversas) ?? 0 }
+  })
+  const polaridades = POLARIDADES.map((p) => {
+    const total = categorias.filter((c) => c.polaridade === p.chave).reduce((s, c) => s + c.total, 0)
+    return { ...p, total, pct: pct(total, conversas) ?? 0 }
+  })
+  return { conversas, polaridades, categorias }
+}
+
 export type ResumoAoVivo = {
   conversas: number
   mensagens: number
   resolucaoAutomaticaPct: number | null
   escalonadas: number
   escalonadasPct: number | null
+  /** Sentimento estimado por conversa, só agregado. */
+  sentimento: ResumoSentimento
   /** Escalonamentos porque a conversa travou (limite de passos ou dois "não entendi"). */
   travadas: number
   porAcao: Contagem[]
@@ -128,6 +179,7 @@ export function resumirAoVivo(respostas: RegistroResposta[], chamadas: RegistroL
     resolucaoAutomaticaPct: pct(conversas - sessoesEscalonadas.size, conversas),
     escalonadas: sessoesEscalonadas.size,
     escalonadasPct: pct(sessoesEscalonadas.size, conversas),
+    sentimento: distribuirSentimentos(respostas),
     travadas: new Set(respostas.filter((r) => r.motivos.some((m) => MOTIVOS_DE_TRAVA.includes(m))).map((r) => r.sessaoId)).size,
     porAcao: contar(casos.map((c) => c.acao), (a) => ROTULO_ACAO[a] ?? rotular(a)),
     casos: paginarCasos(casos, filtro),

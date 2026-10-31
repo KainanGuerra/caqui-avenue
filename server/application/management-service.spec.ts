@@ -44,6 +44,9 @@ describe('painel do gerente: o que passa pelo pipeline aparece no painel', () =>
     expect(p.casos.itens[0]).toMatchObject({ protocolo: golpe.protocolo, acao: 'Segurança imediata', clienteNome: 'Marta Siqueira' })
     expect(p.qualidade.comFontePct).toBe(100)
     expect(p.latencia.mediaMs).not.toBeNull()
+    // Rafael só perguntou e foi respondido com fonte; Marta relatou golpe.
+    expect(p.sentimento.categorias.find((s) => s.chave === 'satisfeito')?.total).toBe(1)
+    expect(p.sentimento.categorias.find((s) => s.chave === 'preocupado')?.total).toBe(1)
   })
 
   it('texto do modelo reprovado pelo validador entra na qualidade', async () => {

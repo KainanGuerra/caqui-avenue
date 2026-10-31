@@ -146,6 +146,12 @@ export type Contagem = { chave: string; rotulo: string; total: number; pct: numb
 export type StatusCaso = 'aberto' | 'assumido' | 'resolvido'
 export type CasoEscalonado = { protocolo: string; clienteNome: string; acao: string; motivos: string[]; status: StatusCaso; prioridade: 0 | 1 | 2; criadoEm: string }
 
+export type Sentimento = 'preocupado' | 'insatisfeito' | 'frustrado' | 'satisfeito' | 'neutro'
+export type Polaridade = 'negativo' | 'neutro' | 'positivo'
+export type ContagemSentimento = Contagem & { chave: Sentimento; criterio: string; polaridade: Polaridade }
+export type ContagemPolaridade = Contagem & { chave: Polaridade }
+export type ResumoSentimento = { conversas: number; polaridades: ContagemPolaridade[]; categorias: ContagemSentimento[] }
+
 export type PainelGerente = {
   redacao: 'template' | 'anthropic' | 'openai'
   conversas: number
@@ -153,6 +159,7 @@ export type PainelGerente = {
   resolucaoAutomaticaPct: number | null
   escalonadas: number
   escalonadasPct: number | null
+  sentimento: ResumoSentimento
   travadas: number
   porAcao: Contagem[]
   casos: { itens: CasoEscalonado[]; total: number; pagina: number; paginas: number }
