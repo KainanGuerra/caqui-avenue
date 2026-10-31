@@ -1,0 +1,27 @@
+# Kaki: atendimento da Caqui Invest. Uso: docker compose up --build  (depois http://localhost:3000)
+# Tudo é opcional: sem .env o agente roda no modo template, sem LLM e com o painel de suporte aberto.
+services:
+  kaki:
+    build: .
+    image: caqui-kaki:local
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      DADOS_DIR: /dados
+      RELOGIO: ${RELOGIO:-dados}
+      LLM_PROVIDER: ${LLM_PROVIDER:-template}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_TIMEOUT_MS: ${LLM_TIMEOUT_MS:-8000}
+      UNDERSTANDING_LLM: ${UNDERSTANDING_LLM:-false}
+      ATENDENTE_PIN: ${ATENDENTE_PIN:-}
+    volumes:
+      # Pacote de dados do case, somente leitura: o container nunca altera o caqui-invest/.
+      - ./caqui-invest/dados:/dados:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped

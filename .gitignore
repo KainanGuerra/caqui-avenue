@@ -1,0 +1,11 @@
+node_modules/
+.nuxt/
+.output/
+.env
+.env.*
+!.env.example
+respostas*.jsonl
+.DS_Store
+
+# material do case (somente consulta, tem repositório próprio)
+/caqui-invest/

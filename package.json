@@ -1,0 +1,35 @@
+{
+  "name": "caqui-atendimento",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Agente de atendimento da Caqui Invest: o código decide, o LLM só redige.",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "test": "vitest run",
+    "typecheck": "nuxt typecheck",
+    "perguntas": "tsx scripts/run-test-questions.ts",
+    "avaliar-sinais": "tsx scripts/eval-signals.ts"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.149",
+    "@nuxt/ui": "^4.12.0",
+    "nuxt": "^4.1.0",
+    "tailwindcss": "^4.3.3",
+    "vue": "^3.5.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0",
+    "vue-tsc": "^3.0.0"
+  }
+}

@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Laranja-caqui: o 600 (#c4521b) é a cor da marca; o texto branco sobre ele passa de 4,5:1. */
+@theme static {
+  --color-caqui-50: #fef5ee;
+  --color-caqui-100: #fbe9dd;
+  --color-caqui-200: #f6cfb5;
+  --color-caqui-300: #efae85;
+  --color-caqui-400: #e68551;
+  --color-caqui-500: #dc6a2c;
+  --color-caqui-600: #c4521b;
+  --color-caqui-700: #a23f16;
+  --color-caqui-800: #843418;
+  --color-caqui-900: #6c2e17;
+  --color-caqui-950: #3a1509;
+}
+
+/* O padrão do Nuxt UI usa o 500 no claro, que não dá contraste com texto branco: sobe para 600. */
+:root { --ui-primary: var(--ui-color-primary-600); }
+.dark { --ui-primary: var(--ui-color-primary-400); }
+
+/* Letra grande (pessoa idosa): escala a raiz, e tudo em rem acompanha. */
+html { font-size: 16px; }
+html.letra-grande { font-size: 20px; }
+
+/* Rolagem do chat não puxa a página. */
+.rolagem-chat { overscroll-behavior: contain; }

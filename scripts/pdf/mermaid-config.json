@@ -1,0 +1,3 @@
+{"theme":"base","themeVariables":{"primaryColor":"#F6F1EA","primaryBorderColor":"#D9622B","primaryTextColor":"#1F2A37","lineColor":"#5B6573","secondaryColor":"#FFFFFF","tertiaryColor":"#FFFFFF","fontFamily":"Helvetica, Arial, sans-serif","fontSize":"20px"},
+"flowchart":{"htmlLabels":true,"curve":"basis","nodeSpacing":18,"rankSpacing":28,"padding":6,"wrappingWidth":120},
+"sequence":{"actorMargin":30,"messageMargin":28,"boxMargin":6,"noteMargin":6,"width":130,"height":44,"wrap":true,"useMaxWidth":false}}
