@@ -30,6 +30,8 @@ FROM node:24-alpine AS runtime
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 DADOS_DIR=/dados
 WORKDIR /app
 COPY --from=build /app/.output ./.output
+# Dados fictícios na imagem: hospedagem sem volume (Render) precisa deles aqui. O compose os monta por cima, somente leitura.
+COPY data /dados
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 CMD wget -qO- http://127.0.0.1:3000/api/saude || exit 1
