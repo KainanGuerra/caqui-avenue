@@ -48,8 +48,8 @@ const cand = (texto: string, tags: string, p: Peso, contexto?: Candidata['contex
 const interessa = (c: ContextoSugestao, ...ints: string[]) => (ints.some((i) => c.ultimasIntencoes.includes(i)) ? 6 : 0)
 
 function candidatas(c: ContextoSugestao): Candidata[] {
+  // Pedir uma pessoa não é sugestão: ela aparece na resposta quando a Kaki não resolve (D17); digitar o pedido continua valendo.
   const lista: Candidata[] = [
-    cand('Quero falar com uma pessoa', 'atendente humano atendimento ajuda', peso(9, 3, 2, 3)),
     cand('Como sei se uma ligação ou mensagem é golpe?', 'seguranca fraude senha codigo gerente', peso(8, 6, 2, 3), (x) => (x.ultimaAcao === 'seguranca_imediata' ? 8 : 0)),
     cand('Como bloqueio meu acesso?', 'seguranca golpe bloquear aparelho', peso(0, 0, 0, 0), (x) => (x.ultimaAcao === 'seguranca_imediata' ? 10 : 0)),
     cand('O gerente me ligou pedindo o código do SMS', 'golpe senha token seguranca', peso(0, 0, 0, 0)),

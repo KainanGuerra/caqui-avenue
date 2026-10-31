@@ -23,6 +23,8 @@ export type Plano = {
   fontes: Fonte[]
   /** A dúvida foi respondida: zera o contador de passos. */
   resolvido: boolean
+  /** A Kaki ficou sem saída (não sabe ou não entendeu de novo): a pessoa é a alternativa que resta. */
+  oferecerHumano?: boolean
   ultimoProduto?: string
   ultimaOperacaoId?: string
 }
@@ -147,11 +149,11 @@ function planoNaoEntendi(c: ContextoPlano): Plano {
   const texto = n === 0
     ? 'Não consegui entender direito. Pode me contar de outro jeito o que você precisa?'
     : 'Ainda não entendi, e não quero te fazer perder tempo. Quer que eu chame uma pessoa para ajudar?'
-  return plano(c.decisao.oferecerHumano ? `${texto} ${SAIDA_HUMANO}` : texto)
+  return c.decisao.oferecerHumano ? plano(`${texto} ${SAIDA_HUMANO}`, { oferecerHumano: true }) : plano(texto)
 }
 
 function planoNaoSei(): Plano {
-  return plano(`Essa informação eu não tenho na minha base, e prefiro não inventar. ${SAIDA_HUMANO}`)
+  return plano(`Essa informação eu não tenho na minha base, e prefiro não inventar. ${SAIDA_HUMANO}`, { oferecerHumano: true })
 }
 
 function posicaoDe(conta: DadosDoCliente, s: Slots, ultimoProduto: string | null): Posicao[] {
@@ -344,6 +346,7 @@ export function montarPlano(c: ContextoPlano): Plano {
     obrigatorios: [...new Set(uniao.flatMap((p) => p.obrigatorios))],
     fontes: [...new Map(uniao.flatMap((p) => p.fontes).map((f) => [f.id, f])).values()],
     resolvido: uniao.every((p) => p.resolvido),
+    oferecerHumano: uniao.some((p) => p.oferecerHumano),
     ultimoProduto: uniao.find((p) => p.ultimoProduto)?.ultimoProduto,
     ultimaOperacaoId: uniao.find((p) => p.ultimaOperacaoId)?.ultimaOperacaoId,
   })

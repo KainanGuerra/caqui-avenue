@@ -8,28 +8,27 @@ Funcionalidade: Página de Atendimento do cliente
   Contexto:
     Dado que o cliente da sessão é C-0001
 
-  @regra-12
-  Cenário: Às 14h uma pessoa pode atender
+  @regra-1 @regra-12
+  Cenário: A pessoa é a última linha da página, discreta
     Dado que agora é 18/11/2026 às 14h
     Quando a página de Atendimento abre
-    Então o card diz "Uma pessoa pode te atender agora" com o ponto verde
-    E o botão é "Falar com uma pessoa"
+    Então não há card nem botão de destaque para falar com uma pessoa
+    E depois das perguntas frequentes há "Não encontrou o que precisava?" com o link "Prefere falar com uma pessoa?"
+    E abaixo diz que pessoas atendem das 8h às 20h e que quem atender já vê o que a pessoa contou
     E não há espera estimada
 
   @regra-12
-  Cenário: Às 23h o atendimento por pessoa está fechado
+  Cenário: Às 23h a linha discreta avisa o retorno
     Dado que agora é 18/11/2026 às 23h
     Quando a página de Atendimento abre
-    Então o card diz "Atendimento volta amanhã a partir das 8h" com o ponto cinza
-    E diz que pessoas atendem das 8h às 20h, todos os dias
-    E o botão é "Registrar minha demanda"
+    Então a linha diz que pessoas atendem das 8h às 20h e que o retorno é amanhã a partir das 8h
     E nenhum protocolo aparece
 
   @regra-12
   Cenário: O protocolo só aparece depois de registrar a demanda
     Dado que agora é 18/11/2026 às 23h
-    Quando a pessoa toca em "Registrar minha demanda"
-    Então o pedido de pessoa vai ao pipeline e a ação é protocolo
+    Quando a pessoa toca em "Prefere falar com uma pessoa?"
+    Então o pedido de pessoa é registrado pela página, sem abrir a conversa, e a ação é protocolo
     E a página mostra o protocolo que veio na resposta do servidor e o retorno a partir das 8h
     E o caso passa a aparecer em "Minhas conversas"
 
@@ -51,8 +50,9 @@ Funcionalidade: Página de Atendimento do cliente
   Esquema do Cenário: Segurança 24h, sem fila, a qualquer hora
     Dado que agora é 18/11/2026 às <hora>
     Quando a pessoa toca em "Falar com a segurança agora"
-    Então a conversa abre e envia "Preciso falar com a segurança agora: acho que estou sofrendo um golpe."
+    Então o pedido é registrado pela página, sem abrir a conversa
     E a ação é seguranca_imediata, com prioridade de golpe na fila
+    E a página mostra o protocolo e os passos da KB-020
 
     Exemplos:
       | hora  |
@@ -68,8 +68,8 @@ Funcionalidade: Página de Atendimento do cliente
   @regra-4
   Cenário: Onde investir vai ao especialista
     Quando a pessoa toca em "Quer saber onde investir?"
-    Então a conversa abre e envia essa pergunta
-    E a ação é encaminhar_especialista
+    Então o pedido de especialista é registrado pela página, sem abrir a conversa
+    E a ação é encaminhar_especialista, e a página mostra o protocolo
     E a linha mostra a fonte que a busca na base achou para a pergunta (KB-029 nos dados)
 
   @regra-9
@@ -79,10 +79,10 @@ Funcionalidade: Página de Atendimento do cliente
     E "Quando cai meu resgate?" mostra a fonte KB-006
     E nenhuma mostra a KB-007, que é a versão antiga
     Quando a pessoa toca em uma pergunta
-    Então a conversa abre e envia a pergunta
-    E a resposta cita a mesma fonte que a página mostrou
+    Então o artigo da base abre na própria página, com a mesma fonte
+    E a conversa não abre
 
-  Cenário: Pergunte à Kaki leva para a conversa que já existe
+  Cenário: Pergunte à Kaki é o único caminho para a conversa
     Quando a pessoa escreve uma dúvida no campo e envia
     Então a conversa abre e envia a dúvida
     E as sugestões do card são as mesmas do chat, montadas pelo servidor para o perfil
@@ -103,4 +103,4 @@ Funcionalidade: Página de Atendimento do cliente
 
   Cenário: O que fica de fora neste corte
     Quando a página de Atendimento abre
-    Então não há "Bloquear meu acesso", "Fazer uma reclamação", "Encerrar minha conta" nem barra inferior de abas
+    Então não há "Bloquear meu acesso", "Fazer uma reclamação" nem "Encerrar minha conta"

@@ -1,10 +1,13 @@
 import { descreverHorario, descreverRetorno, humanoDisponivel } from './business-hours'
 import { rotuloMotivo, type Caso } from './case-summary'
+import { artigoAtual, type ArtigoLeitura } from './kb-reading'
 import { melhorArtigo } from './kb-search'
 import type { Momento } from './momento'
 import type { ArtigoKb } from './types'
 
 export type PerguntaComFonte = { pergunta: string; kbId: string | null }
+/** A resposta abre na própria página: o artigo da base vem junto, e a conversa fica como última alternativa. */
+export type PerguntaFrequente = PerguntaComFonte & { artigo: ArtigoLeitura | null }
 export type StatusCasoVista = 'respondido' | 'em_andamento'
 export type CasoVista = { protocolo: string; motivo: string; criadoEm: string; status: StatusCasoVista }
 
@@ -14,7 +17,7 @@ export type AtendimentoVista = {
   horario: string
   /** "amanhã a partir das 8h" fora do horário; null quando há pessoa agora. */
   retorno: string | null
-  faq: PerguntaComFonte[]
+  faq: PerguntaFrequente[]
   especialista: PerguntaComFonte
   casos: CasoVista[]
 }
@@ -30,8 +33,11 @@ export const PERGUNTAS_FREQUENTES: { pergunta: string; assunto: string }[] = [
 /** O pipeline trata a pergunta como pedido de recomendação e encaminha ao especialista (regra 4). */
 export const PERGUNTA_ESPECIALISTA = 'Quer saber onde investir?'
 
-export function perguntasFrequentes(kb: ArtigoKb[]): PerguntaComFonte[] {
-  return PERGUNTAS_FREQUENTES.map(({ pergunta, assunto }) => ({ pergunta, kbId: melhorArtigo(kb, assunto)?.artigo.id ?? null }))
+export function perguntasFrequentes(kb: ArtigoKb[]): PerguntaFrequente[] {
+  return PERGUNTAS_FREQUENTES.map(({ pergunta, assunto }) => {
+    const kbId = melhorArtigo(kb, assunto)?.artigo.id ?? null
+    return { pergunta, kbId, artigo: kbId ? artigoAtual(kb, kbId) : null }
+  })
 }
 
 /** Casos da própria pessoa, do mais novo para o mais antigo. Resolvido é "respondido"; aberto ou assumido segue "em andamento". */

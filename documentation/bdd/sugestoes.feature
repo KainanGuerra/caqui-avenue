@@ -6,12 +6,17 @@ Funcionalidade: Sugestões de pergunta no chat
   essa informação". Perfis: idoso (60 anos ou mais), iniciante (cliente da parceria, cliente novo ou sem posições),
   experiente (dois ou mais produtos) e padrão.
 
-  Cenário: Cliente idoso recebe atendimento e segurança em linguagem simples
+  Cenário: Cliente idoso recebe segurança em linguagem simples
     Dado que o cliente da sessão tem 63 anos
     Quando a tela abre as sugestões
-    Então a primeira é "Quero falar com uma pessoa"
-    E entre elas há "Como sei se uma ligação ou mensagem é golpe?"
+    Então a primeira é "Como sei se uma ligação ou mensagem é golpe?"
     E nenhuma fala de alíquota de imposto
+
+  Cenário: Pedir uma pessoa nunca é sugestão
+    Dado qualquer perfil, qualquer momento da conversa e qualquer digitação, inclusive "pessoa" e "atendente"
+    Quando a tela abre as sugestões
+    Então nenhuma pede para falar com uma pessoa
+    Mas escrever "Quero falar com uma pessoa" continua chamando uma pessoa
 
   Cenário: Cliente experiente recebe perguntas técnicas sobre os próprios produtos
     Dado que o cliente da sessão tem vários produtos

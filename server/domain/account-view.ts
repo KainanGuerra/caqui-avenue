@@ -1,7 +1,13 @@
 import type { CalendarioUtil } from './calendar'
-import { dataBr, hhmm, parseMomento } from './momento'
+import { dataBr, hhmm, parseMomento, type Momento } from './momento'
 import { CORTE_MINUTOS, calcularLiquidacao, diaBase } from './settlement'
 import type { DadosDoCliente, Operacao, Posicao, ProdutoTaxa, Taxas } from './types'
+
+/** Quando o dinheiro cai se o resgate for pedido agora. Datas em AAAA-MM-DD, sempre calculadas (regra 1). */
+export type PrazoResgate =
+  | { tipo: 'liquida'; pagamento: string; detalhe: string; fontes: string[] }
+  | { tipo: 'em_carencia'; disponivelEm: string; fontes: string[] }
+  | { tipo: 'no_vencimento'; vencimento: string | null; fontes: string[] }
 
 export type PosicaoVista = {
   id: string
@@ -14,9 +20,13 @@ export type PosicaoVista = {
   saldoBrutoCentavos: number
   /** Saldo bruto menos o valor aplicado (antes do IR); pode ser negativo, como nas ações. */
   rendimentoBrutoCentavos: number
+  /** null quando o produto da posição não está na tabela de taxas. */
+  resgate: PrazoResgate | null
 }
 
-export type OperacaoVista = Pick<Operacao, 'id' | 'tipo' | 'valorCentavos' | 'pedidoEm' | 'status' | 'liquidacaoPrevista'> & { nomeProduto: string | null }
+// Sem liquidacao_prevista: a coluna da planilha não é fonte de data (regra 1); o prazo das operações em processamento
+// sai de `emAndamento`, calculado.
+export type OperacaoVista = Pick<Operacao, 'id' | 'tipo' | 'valorCentavos' | 'pedidoEm' | 'status'> & { nomeProduto: string | null }
 
 export type EstadoEtapa = 'feito' | 'atual' | 'proximo'
 /** `data` em AAAA-MM-DD; `hora` só no pedido ("19h40"). */
@@ -77,18 +87,23 @@ const ehFimDeSemana = (data: string) => indiceSemana(data) === 0 || indiceSemana
 const diaMes = (data: string) => dataBr(data).slice(0, 5)
 
 // A tela só exibe: somas, datas, etapas e textos saem daqui. Sem CPF e sem campo de outro cliente (regra 10).
-export function montarConta(conta: DadosDoCliente, taxas: Taxas, cal: CalendarioUtil, hoje: string): ContaVista {
+export function montarConta(conta: DadosDoCliente, taxas: Taxas, cal: CalendarioUtil, agora: Momento): ContaVista {
+  const hoje = agora.data
   const produtoDe = (codigo: string | null) => (codigo ? taxas.produtos.find((p) => p.codigo === codigo) ?? null : null)
   const nome = (codigo: string | null) => (codigo ? (produtoDe(codigo)?.nome ?? codigo) : null)
-  const posicoes = conta.posicoes.map<PosicaoVista>((p) => ({
-    id: p.id, produto: p.produto, nomeProduto: nome(p.produto) ?? p.produto, dataAplicacao: p.dataAplicacao, taxaContratada: p.taxaContratada,
-    vencimento: p.vencimento, valorAplicadoCentavos: p.valorAplicadoCentavos, saldoBrutoCentavos: p.saldoBrutoCentavos,
-    rendimentoBrutoCentavos: p.saldoBrutoCentavos - p.valorAplicadoCentavos,
-  }))
+  const posicoes = conta.posicoes.map<PosicaoVista>((p) => {
+    const produto = produtoDe(p.produto)
+    return {
+      id: p.id, produto: p.produto, nomeProduto: produto?.nome ?? p.produto, dataAplicacao: p.dataAplicacao, taxaContratada: p.taxaContratada,
+      vencimento: p.vencimento, valorAplicadoCentavos: p.valorAplicadoCentavos, saldoBrutoCentavos: p.saldoBrutoCentavos,
+      rendimentoBrutoCentavos: p.saldoBrutoCentavos - p.valorAplicadoCentavos,
+      resgate: produto ? prazoDeResgate(p, produto, cal, agora) : null,
+    }
+  })
   const operacoes = [...conta.operacoes]
     .sort((a, b) => b.pedidoEm.localeCompare(a.pedidoEm))
     .slice(0, MAX_OPERACOES)
-    .map<OperacaoVista>((o) => ({ id: o.id, tipo: o.tipo, valorCentavos: o.valorCentavos, pedidoEm: o.pedidoEm, status: o.status, liquidacaoPrevista: o.liquidacaoPrevista, nomeProduto: nome(o.produto) }))
+    .map<OperacaoVista>((o) => ({ id: o.id, tipo: o.tipo, valorCentavos: o.valorCentavos, pedidoEm: o.pedidoEm, status: o.status, nomeProduto: nome(o.produto) }))
   const soma = (f: (p: PosicaoVista) => number) => posicoes.reduce((s, p) => s + f(p), 0)
   const totalAplicadoCentavos = soma((p) => p.valorAplicadoCentavos)
   const totalBrutoCentavos = soma((p) => p.saldoBrutoCentavos)
@@ -162,6 +177,18 @@ function etapasDaOperacao(
     etapas.push({ titulo: 'Vencimento', detalhe: 'Produto sem liquidez diária: o valor sai no vencimento', data: liq.vencimento, hora: null })
   }
   return { etapas: marcarEstados(etapas, hoje), liquidacaoPrevista: liq.tipo === 'liquida' ? liq.pagamento : null }
+}
+
+/** O mesmo cálculo da conversa (`calcularLiquidacao`), com o pedido feito agora. */
+export function prazoDeResgate(posicao: Pick<Posicao, 'dataAplicacao' | 'vencimento'>, produto: ProdutoTaxa, cal: CalendarioUtil, agora: Momento): PrazoResgate {
+  const fontes = [FONTE_PRAZOS]
+  const liq = calcularLiquidacao(cal, { produto, data: agora.data, minutos: agora.minutos, dataAplicacao: posicao.dataAplicacao, vencimento: posicao.vencimento })
+  if (liq.tipo === 'em_carencia') return { tipo: 'em_carencia', disponivelEm: liq.disponivelEm, fontes }
+  if (liq.tipo === 'sem_liquidez_diaria') return { tipo: 'no_vencimento', vencimento: liq.vencimento, fontes }
+  const contaDepois = liq.diaBase !== agora.data
+    ? ` Pedido agora conta a partir de ${diaDaSemana(liq.diaBase)}, ${diaMes(liq.diaBase)}${cal.ehDiaUtil(agora.data) ? `, porque passou das ${hhmm(CORTE_MINUTOS)}` : ''}.`
+    : ''
+  return { tipo: 'liquida', pagamento: liq.pagamento, detalhe: `${detalheLiquidacao(produto)}.${contaDepois}`, fontes }
 }
 
 function detalheLiquidacao(produto: ProdutoTaxa): string {

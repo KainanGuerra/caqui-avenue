@@ -40,7 +40,7 @@ Funcionalidade: Não sabe, diz que não sabe
   Esquema do Cenário: Assuntos que a base não cobre
     Quando o cliente pergunta <pergunta>
     Então a resposta diz que não tem essa informação
-    E oferece falar com uma pessoa
+    E logo abaixo da resposta aparece o botão "Falar com uma pessoa" (fora do horário, "Registrar minha demanda")
     E nenhum prazo, taxa ou regra é inventado
 
     Exemplos:

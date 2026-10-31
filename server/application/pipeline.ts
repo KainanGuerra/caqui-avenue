@@ -142,6 +142,8 @@ export class Pipeline {
     if (caso && fontes.length) casos.abrirOuAtualizar(sessao, conta.cliente, decisao, textoSeguro, fontes, agoraIso)
 
     const resposta: Mensagem = { papel: 'agente', texto: final, em: agoraIso, acao: decisao.acao, fontes, protocolo: caso?.protocolo }
+    // Só quando a Kaki respondeu sem resolver; encaminhamentos já chamam a pessoa e não precisam do botão.
+    if (decisao.acao === 'responder' && plano.oferecerHumano) resposta.oferecerHumano = true
     sessao.historico.push(resposta)
 
     this.d.logger.info('mensagem.processada', {

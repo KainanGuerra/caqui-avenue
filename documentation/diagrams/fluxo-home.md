@@ -1,6 +1,6 @@
 # Fluxo: Home do cliente
 
-O que a Home mostra e de onde cada bloco vem. O servidor monta tudo em `GET /api/chat/{sessaoId}/conta` com funções puras de `server/domain/account-view.ts`; a tela só exibe e envia intenção para a conversa.
+O que a Home mostra e de onde cada bloco vem. O servidor monta tudo em `GET /api/chat/{sessaoId}/conta` com funções puras de `server/domain/account-view.ts`; a tela só exibe e leva a outras páginas. Nenhuma ação abre a conversa (D16).
 
 ```mermaid
 flowchart TD
@@ -8,7 +8,7 @@ flowchart TD
     B --> C["Servidor: dados só do<br/>cliente da sessão"]
     C --> D["Relógio e calendário<br/>dão o hoje e os dias úteis"]
     D --> E{"Há operação<br/>em processamento?"}
-    E -->|sim| F["Etapas pelo corte das 16h<br/>e pelos dias úteis<br/>fonte KB-006 e id da operação"]
+    E -->|sim| F["Etapas pelo corte das 16h<br/>e pelos dias úteis<br/>fonte KB-006 e id da operação<br/>card recolhido: data e etapa atual"]
     E -->|não| G["Sem card Em andamento"]
     F --> H["Patrimônio = saldo bruto<br/>+ saldo em conta<br/>resultado desde a aplicação"]
     G --> H
@@ -19,11 +19,13 @@ flowchart TD
     K --> L
     L --> M["Tela exibe na ordem:<br/>saudação, em andamento, visão geral,<br/>avisos, ações, alocação, próximos passos"]
     M --> N{"O que a pessoa toca?"}
-    N -->|"Resgatar ou<br/>Ver detalhes do resgate"| O["Conversa envia<br/>Quando cai meu resgate?"]
-    N -->|"Falar com uma pessoa"| P["Abre a página de Atendimento<br/>ver fluxo-atendimento"]
+    N -->|"Resgatar ou<br/>Ver detalhes do resgate"| O["Abre a Carteira<br/>prazo de resgate por posição"]
+    N -->|"Investir"| R["Abre Investir<br/>produtos explicados e especialista"]
+    N -->|"Atendimento"| P["Abre a página de Atendimento<br/>ver fluxo-atendimento"]
+    N -->|"Card educativo"| S["Abre Aprender"]
     N -->|"Ocultar valores"| Q["Só a tela muda<br/>nada vai ao servidor"]
 ```
 
-A data de cada etapa é a mesma que a Kaki responde na conversa: as duas saem de `calcularLiquidacao` com o mesmo relógio (D8, D12).
+A data de cada etapa é a mesma que a Kaki responde na conversa: as duas saem de `calcularLiquidacao` com o mesmo relógio (D8, D12). As páginas de destino estão em `fluxo-paginas-do-cliente.md`.
 
 Referenciado em `../JORNADA_DO_USUARIO.pdf` (Home do cliente) e `bdd/home.feature`.

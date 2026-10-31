@@ -31,6 +31,8 @@ Funcionalidade: Sem doom loop
     Dado que o agente já respondeu "não entendi" uma vez
     Quando o cliente envia outra mensagem que o agente não entende
     Então a segunda resposta oferece humano em vez de repetir o pedido de reformulação
+    E só nessa resposta aparece o botão "Falar com uma pessoa" (fora do horário, "Registrar minha demanda")
+    E a primeira resposta sem entender não mostra o botão
 
   Esquema do Cenário: Formas de pedir humano
     Dado que agora é 18/11/2026 às 14h

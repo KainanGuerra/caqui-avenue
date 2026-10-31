@@ -39,10 +39,12 @@ function alternarMenu() {
   try { localStorage.setItem(MENU, colunaAberta.value ? 'aberto' : 'fechado') } catch { /* vale só nesta visita */ }
 }
 const menuVisivel = computed(() => (desktop.value ? colunaAberta.value : gaveta.value))
+// No celular o cliente navega pelas abas do rodapé (Figma 50:202), que tomam o lugar da gaveta e da faixa informativa.
+const abas = computed(() => acesso.papel.value === 'cliente' && !desktop.value)
 watch(() => rota.path, () => { gaveta.value = false })
 watch(letraGrande, (v) => document.documentElement.classList.toggle('letra-grande', v))
 
-const itens = computed<EntradaMenu[]>(() => (acesso.papel.value ? menuDoPapel(acesso.papel.value).map((i) => ({ ...i, selo: i.chave === 'conversa' && chat.caso.value && chat.caso.value.status !== 'resolvido' ? '1' : undefined })) : []))
+const itens = computed<EntradaMenu[]>(() => (acesso.papel.value ? menuDoPapel(acesso.papel.value).map((i) => ({ ...i, selo: i.chave === 'atendimento' && chat.caso.value && chat.caso.value.status !== 'resolvido' ? '1' : undefined })) : []))
 const icone = computed(() => ({ light: 'i-lucide-sun', mixed: 'i-lucide-contrast', dark: 'i-lucide-moon' })[modo.value])
 const rotuloTema = computed(() => ({ light: 'Tema claro', mixed: 'Tema misto (topo e menu escuros)', dark: 'Tema escuro' })[modo.value])
 </script>
@@ -54,7 +56,7 @@ const rotuloTema = computed(() => ({ light: 'Tema claro', mixed: 'Tema misto (to
     <header class="fixed inset-x-0 top-0 z-30 h-14 border-b border-default bg-default/90 backdrop-blur" :class="{ dark: cromoEscuro }">
       <div class="flex h-full items-center justify-between gap-3 px-4">
         <div class="flex items-center gap-2">
-          <UButton v-if="entrou" color="neutral" variant="ghost" icon="i-lucide-menu" :aria-label="menuVisivel ? 'Fechar o menu' : 'Abrir o menu'" :aria-expanded="menuVisivel" @click="alternarMenu" />
+          <UButton v-if="entrou && !abas" color="neutral" variant="ghost" icon="i-lucide-menu" :aria-label="menuVisivel ? 'Fechar o menu' : 'Abrir o menu'" :aria-expanded="menuVisivel" @click="alternarMenu" />
           <NuxtLink to="/" class="text-highlighted" aria-label="Caqui Invest, página inicial"><AppLogo /></NuxtLink>
           <UBadge v-if="!entrou" color="neutral" variant="subtle" size="sm">{{ versao }}</UBadge>
         </div>
@@ -78,7 +80,7 @@ const rotuloTema = computed(() => ({ light: 'Tema claro', mixed: 'Tema misto (to
 
     <!-- O menu sempre começa sob o topo, para o botão ficar à vista: coluna ao lado da página em telas largas, gaveta nas estreitas. -->
     <aside
-      v-if="entrou"
+      v-if="entrou && !abas"
       class="fixed bottom-11 left-0 top-14 z-[25] flex w-60 flex-col overflow-y-auto border-r border-default bg-default p-3 transition-transform duration-200"
       :class="[{ dark: cromoEscuro }, menuVisivel ? 'translate-x-0' : '-translate-x-full']"
       aria-label="Menu principal"
@@ -90,13 +92,14 @@ const rotuloTema = computed(() => ({ light: 'Tema claro', mixed: 'Tema misto (to
     </aside>
     <div v-if="entrou && !desktop && gaveta" class="fixed inset-x-0 bottom-11 top-14 z-10 bg-black/40" aria-hidden="true" @click="gaveta = false" />
 
-    <div class="flex min-h-0 flex-1 flex-col pb-11 pt-14 transition-[padding] duration-200" :class="{ 'md:pl-60': entrou && colunaAberta }">
+    <div class="flex min-h-0 flex-1 flex-col pt-14 transition-[padding] duration-200" :class="[abas ? 'pb-[calc(4rem+env(safe-area-inset-bottom))]' : 'pb-11', { 'md:pl-60': entrou && colunaAberta }]">
       <UContainer class="w-full flex-1 py-4" :class="preencheAltura ? 'flex min-h-0 flex-col max-sm:py-2' : entrou ? 'pb-8' : 'overflow-y-auto'">
         <ConnectionBanner class="mb-3" />
         <slot />
       </UContainer>
 
-      <footer class="fixed inset-x-0 bottom-0 z-30 h-11 border-t border-default bg-default/90 text-sm text-muted backdrop-blur" :class="{ dark: cromoEscuro }">
+      <BottomNav v-if="abas" :itens="itens" :class="{ dark: cromoEscuro }" />
+      <footer v-else class="fixed inset-x-0 bottom-0 z-30 h-11 border-t border-default bg-default/90 text-sm text-muted backdrop-blur" :class="{ dark: cromoEscuro }">
         <UContainer class="flex h-full items-center justify-between gap-3">
           <span class="truncate">Kaki {{ versao }} · assistente da Caqui Invest</span>
           <span class="hidden items-center gap-1.5 sm:flex"><UIcon name="i-lucide-shield-check" class="size-4" />Dados fictícios · CPF sempre mascarado</span>

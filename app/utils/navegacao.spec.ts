@@ -1,16 +1,24 @@
 import { describe, expect, it } from 'vitest'
-import { casaDoPapel, destinoPermitido, itemAtivo, menuDoPapel } from './navegacao'
+import { casaDoPapel, destinoPermitido, ITENS_MENU, itemAtivo, menuDoPapel } from './navegacao'
 
 describe('menu por papel', () => {
-  it('cliente vê início, conversa e atendimento; suporte vê só a fila', () => {
-    expect(menuDoPapel('cliente').map((i) => i.chave)).toEqual(['inicio', 'conversa', 'atendimento'])
+  it('cliente vê as cinco abas do rodapé, na ordem do Figma; suporte vê só a fila', () => {
+    expect(menuDoPapel('cliente').map((i) => i.rotulo)).toEqual(['Início', 'Carteira', 'Investir', 'Aprender', 'Atendimento'])
     expect(menuDoPapel('suporte').map((i) => i.chave)).toEqual(['suporte'])
+  })
+
+  it('a conversa não tem aba própria: é a última alternativa, dentro do Atendimento', () => {
+    expect(menuDoPapel('cliente').map((i) => i.para)).not.toContain('/conversa')
+    const atendimento = ITENS_MENU.find((i) => i.chave === 'atendimento')!
+    expect(itemAtivo(atendimento, '/conversa')).toBe(true)
+    expect(menuDoPapel('cliente').filter((i) => itemAtivo(i, '/conversa'))).toEqual([atendimento])
   })
 
   it('item ativo é a própria página ou uma abaixo dela, e não um prefixo parecido', () => {
     expect(itemAtivo({ para: '/suporte' }, '/suporte')).toBe(true)
     expect(itemAtivo({ para: '/suporte' }, '/suporte/casos/1')).toBe(true)
     expect(itemAtivo({ para: '/inicio' }, '/inicio-falso')).toBe(false)
+    expect(itemAtivo({ para: '/atendimento', tambem: ['/conversa'] }, '/conversas')).toBe(false)
   })
 })
 
@@ -26,17 +34,18 @@ describe('quem abre o quê', () => {
     expect(destinoPermitido('suporte', '/')).toBe('/suporte')
   })
 
-  it('cliente não abre a fila e o suporte não abre o chat do cliente', () => {
+  it('cliente não abre a fila e o suporte não abre nenhuma tela do cliente, nem a conversa fora do menu', () => {
     expect(destinoPermitido('cliente', '/suporte')).toBe(casaDoPapel('cliente'))
-    expect(destinoPermitido('suporte', '/conversa')).toBe('/suporte')
-    expect(destinoPermitido('suporte', '/inicio')).toBe('/suporte')
-    expect(destinoPermitido('suporte', '/atendimento')).toBe('/suporte')
-    expect(destinoPermitido(null, '/atendimento')).toBe('/')
+    for (const tela of ['/inicio', '/carteira', '/investir', '/aprender', '/atendimento', '/conversa']) {
+      expect(destinoPermitido('suporte', tela), tela).toBe('/suporte')
+      expect(destinoPermitido(null, tela), tela).toBe('/')
+    }
   })
 
   it('cada papel abre as próprias telas', () => {
-    expect(destinoPermitido('cliente', '/conversa')).toBeNull()
-    expect(destinoPermitido('cliente', '/atendimento')).toBeNull()
+    for (const tela of ['/inicio', '/carteira', '/investir', '/aprender', '/atendimento', '/conversa']) {
+      expect(destinoPermitido('cliente', tela), tela).toBeNull()
+    }
     expect(destinoPermitido('suporte', '/suporte')).toBeNull()
   })
 })

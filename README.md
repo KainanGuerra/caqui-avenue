@@ -1,8 +1,8 @@
 # Kaki: atendimento da Caqui Invest
 
-Agente de atendimento para o Hands On com IA (31/10/2026): **o código decide, o LLM só redige.** Duas visões ligadas pelo mesmo caso: o chat do cliente e o painel do suporte. Tudo é fictício. Os dados do case estão em `data/` (cópia de `caqui-invest/dados`, D14); o case e o checador continuam em `caqui-invest/` (só consulta).
+Agente de atendimento para o Hands On com IA (31/10/2026): **o código decide, o LLM só redige.** Duas visões ligadas pelo mesmo caso: o chat do cliente e o painel do suporte. Tudo é fictício. Os dados do case estão em `data/` (cópia de `caqui-invest/dados`, D18); o case e o checador continuam em `caqui-invest/` (só consulta).
 
-- **Visão do cliente** (`/`): escolhe um cliente simulado e conversa com a Kaki. Fonte em cada resposta factual, botão "Falar com uma pessoa" sempre visível, protocolo à vista, letra grande, simulador de horário.
+- **Visão do cliente** (`/`): escolhe um cliente simulado e conversa com a Kaki. Fonte em cada resposta factual, pessoa oferecida quando a Kaki não resolve (e numa linha discreta do Atendimento), protocolo à vista, letra grande, simulador de horário.
 - **Visão do suporte** (`/atendente`): fila ordenada (golpe, 60 anos ou mais, demais), motivos da decisão, resumo, fontes, conversa; assumir, responder e resolver. A resposta aparece no chat do cliente.
 
 Spec: [SPEC.md](SPEC.md) · Decisões: [DECISIONS.md](DECISIONS.md) · BDD: [documentation/bdd](documentation/bdd/README.md) · Jornada: [documentation/JORNADA_DO_USUARIO.pdf](documentation/JORNADA_DO_USUARIO.pdf)

@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { cal, dados } from '../testing/fixtures'
-import { MAX_OPERACOES, alocarPorClasse, avisosDeFeriado, montarConta } from './account-view'
+import { MAX_OPERACOES, alocarPorClasse, avisosDeFeriado, montarConta, prazoDeResgate } from './account-view'
+import type { Momento } from './momento'
 
 const HOJE = '2026-11-18'
-const contaDe = (id: string, hoje = HOJE) => montarConta(dados.dadosDoCliente(id)!, dados.taxas, cal, hoje)
+// "Agora" dos dados: 18/11/2026 às 10h, antes do corte das 16h.
+const AGORA: Momento = { data: HOJE, minutos: 10 * 60 }
+const contaDe = (id: string, agora = AGORA) => montarConta(dados.dadosDoCliente(id)!, dados.taxas, cal, agora)
+const produto = (codigo: string) => dados.taxas.produtos.find((p) => p.codigo === codigo)!
 const emAndamentoDe = (id: string, operacaoId: string) => contaDe(id).emAndamento.find((o) => o.operacaoId === operacaoId)!
 const resumo = (etapas: { titulo: string; data: string; estado: string }[]) => etapas.map((e) => `${e.titulo}|${e.data}|${e.estado}`)
 
@@ -54,6 +58,48 @@ describe('conta vista pelo cliente', () => {
 
   it('nenhum campo de CPF vai para a tela', () => {
     expect(JSON.stringify(contaDe('C-0001'))).not.toMatch(/cpf|\*\*\*\./i)
+  })
+
+  it('operação não leva a coluna liquidacao_prevista para a tela (regra 1)', () => {
+    expect(contaDe('C-0001').operacoes.every((o) => !('liquidacaoPrevista' in o))).toBe(true)
+  })
+})
+
+describe('prazo de resgate de cada posição (regra 1: pedido agora, corte das 16h, dias úteis)', () => {
+  it('Dona Marta, CDB de liquidez diária às 10h: cai hoje, com fonte KB-006', () => {
+    expect(contaDe('C-0001').posicoes[0]!.resgate).toEqual({
+      tipo: 'liquida', pagamento: '2026-11-18', detalhe: 'Liquidez diária: liquida no dia-base.', fontes: ['KB-006'],
+    })
+  })
+
+  it('o mesmo CDB às 17h conta a partir do próximo dia útil', () => {
+    const r = contaDe('C-0001', { data: HOJE, minutos: 17 * 60 }).posicoes[0]!.resgate
+    expect(r).toMatchObject({ tipo: 'liquida', pagamento: '2026-11-19' })
+    expect(r).toMatchObject({ detalhe: expect.stringContaining('conta a partir de quinta, 19/11, porque passou das 16h00') })
+  })
+
+  it('16h00 em ponto ainda conta no mesmo dia (premissa D4)', () => {
+    expect(contaDe('C-0001', { data: HOJE, minutos: 16 * 60 }).posicoes[0]!.resgate).toMatchObject({ pagamento: '2026-11-18' })
+  })
+
+  it('LCI aplicada em 05/10 está em carência de 90 dias até 03/01/2027', () => {
+    expect(contaDe('C-0001').posicoes[1]!.resgate).toEqual({ tipo: 'em_carencia', disponivelEm: '2027-01-03', fontes: ['KB-006'] })
+  })
+
+  it('CDB sem liquidez diária só sai no vencimento da posição', () => {
+    const p = contaDe('C-0019').posicoes.find((x) => x.produto === 'CDB-2A-120')!
+    expect(p.resgate).toEqual({ tipo: 'no_vencimento', vencimento: '2028-01-20', fontes: ['KB-006'] })
+  })
+
+  it('fundo de renda fixa: pagamento em D+2 úteis pula o feriado de 20/11', () => {
+    const r = prazoDeResgate({ dataAplicacao: '2026-01-02', vencimento: null }, produto('FUNDO-RF-01'), cal, AGORA)
+    expect(r).toMatchObject({ tipo: 'liquida', pagamento: '2026-11-23' })
+  })
+
+  it('pedido no fim de semana conta a partir do próximo dia útil, sem falar em corte', () => {
+    const r = prazoDeResgate({ dataAplicacao: '2026-01-02', vencimento: null }, produto('CDB-LD-100'), cal, { data: '2026-11-21', minutos: 10 * 60 })
+    expect(r).toMatchObject({ tipo: 'liquida', pagamento: '2026-11-23' })
+    expect(r).toMatchObject({ detalhe: expect.not.stringContaining('16h') })
   })
 })
 

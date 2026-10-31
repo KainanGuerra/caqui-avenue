@@ -8,6 +8,8 @@ import { em } from '../testing/fixtures'
 
 // Sugestão que o agente não entende seria uma promessa quebrada: toda frase sugerida precisa ter resposta.
 describe('toda sugestão tem resposta', () => {
+  // Centenas de frases passam pelo pipeline inteiro; com a suíte em paralelo, os 5s padrão do Vitest ficam no limite.
+  const TEMPO_PARA_TODAS_AS_FRASES_MS = 30_000
   const DIA = '2026-11-18T14:00-03:00'
   const c = montarContainer({ env: loadEnv({}), clock: relogioFixo(em(DIA)), logger: loggerMudo })
   const ctx = (id: string, extra: Partial<ContextoSugestao> = {}): ContextoSugestao => {
@@ -37,5 +39,5 @@ describe('toda sugestão tem resposta', () => {
       if (r.motivos.includes('NAO_ENTENDEU') || /não tenho na minha base|Não consegui entender/.test(r.texto)) problemas.push(`${id}: "${frase}" -> ${r.acao} ${r.texto.slice(0, 70)}`)
     }
     expect(problemas).toEqual([])
-  })
+  }, TEMPO_PARA_TODAS_AS_FRASES_MS)
 })

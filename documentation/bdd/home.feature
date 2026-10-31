@@ -14,7 +14,9 @@ Funcionalidade: Home do cliente
     E a operação OP-10005 é um resgate de R$ 40.000,00 do CDB Liquidez Diária 110 pedido em 17/11/2026 às 19h40
     Quando a Home pede a conta
     Então o card "Em andamento" diz "Seu resgate de R$ 40.000,00 cai hoje, 18/11"
-    E as etapas são "Pedido recebido · 17/11, 19h40" concluída, "Liquidação · 18/11" em andamento e "No saldo disponível · 18/11" próxima
+    E o card começa recolhido, com "Etapa atual: Liquidação"
+    Quando a pessoa toca no card
+    Então as etapas são "Pedido recebido · 17/11, 19h40" concluída, "Liquidação · 18/11" em andamento e "No saldo disponível · 18/11" próxima
     E o pedido explica "Depois das 16h00: conta a partir do próximo dia útil"
     E a fonte é "KB-006 · OP-10005"
 
@@ -87,32 +89,30 @@ Funcionalidade: Home do cliente
     Dado uma posição no Caqui Multimercado FIF
     Então ela entra em renda variável, porque o valor da cota pode cair (KB-014)
 
-  Cenário: Ações rápidas são só as que existem
+  Cenário: Ações rápidas levam a páginas, nunca à conversa
     Quando a pessoa abre a Home
-    Então as ações são "Resgatar" e "Falar com uma pessoa"
-    E não há "Investir" nem "Transferir"
-    Quando a pessoa toca em "Resgatar"
-    Então a conversa abre e envia "Quando cai meu resgate?"
-    Quando a pessoa toca em "Falar com uma pessoa"
+    Então as ações são "Investir", "Resgatar" e "Atendimento"
+    E não há "Transferir", porque não há fluxo de transferência
+    E "Atendimento" mostra o horário que vem do servidor, "das 8h às 20h, todos os dias"
+    Quando a pessoa toca em "Investir"
+    Então abre a página Investir
+    Quando a pessoa toca em "Resgatar" ou em "Ver detalhes do resgate"
+    Então abre a Carteira, com o prazo de resgate de cada posição
+    Quando a pessoa toca em "Atendimento"
     Então abre a página de Atendimento, que decide entre falar agora e registrar a demanda
+
+  @regra-4
+  Cenário: Camila toca em Investir e encontra o especialista
+    Dado que o cliente da sessão é C-0003
+    Quando a pessoa toca em "Investir"
+    Então a página Investir explica os produtos sem indicar nenhum
+    E oferece "Pedir um especialista", com fonte KB-029
 
   @regra-4
   Cenário: Conteúdo educativo não é recomendação
     Quando a pessoa vê "Próximos passos"
     Então o card de liquidez traz o selo "Conteúdo educativo, não é recomendação"
     E não indica produto nem percentual
-
-  @regra-12
-  Esquema do Cenário: Atendimento humano com a disponibilidade real
-    Dado que agora é 18/11/2026 às <hora>
-    Quando a pessoa vê "Próximos passos"
-    Então o card "Falar com uma pessoa" diz <texto>
-    E tocar nele abre a página de Atendimento
-
-    Exemplos:
-      | hora  | texto                                                          |
-      | 14h00 | "Uma pessoa da Caqui está disponível agora."                   |
-      | 23h00 | "Fora do horário: a pessoa volta às 8h. Golpe e segurança, 24h." |
 
   @regra-10
   Cenário: A Home só traz dados do cliente da sessão

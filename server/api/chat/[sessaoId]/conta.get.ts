@@ -9,5 +9,5 @@ export default defineEventHandler((event) => {
   if (!sessao) throw createError({ statusCode: 404, statusMessage: 'Sessão não encontrada' })
   const conta = c.dados.dadosDoCliente(sessao.clienteId)
   if (!conta) throw createError({ statusCode: 404, statusMessage: 'Cliente não encontrado' })
-  return montarConta(conta, c.dados.taxas, c.cal, c.relogio.agora().data)
+  return montarConta(conta, c.dados.taxas, c.cal, c.relogio.agora())
 })

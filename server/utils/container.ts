@@ -1,6 +1,7 @@
 import { carregarDados, type Dados } from '../infrastructure/data/dados'
 import { criarCalendario, type CalendarioUtil } from '../domain/calendar'
 import { CaseService } from '../application/case-service'
+import { PedidoService } from '../application/page-request-service'
 import { Pipeline, type Entendimento, type Redator } from '../application/pipeline'
 import { criarRelogio, type Clock } from '../infrastructure/clock'
 import { loadEnv, type Env } from '../infrastructure/env'
@@ -23,6 +24,7 @@ export type Container = {
   sessoes: SessionStore
   casos: CaseService
   pipeline: Pipeline
+  pedidos: PedidoService
   logger: Logger
 }
 
@@ -52,7 +54,9 @@ export function montarContainer(o: Overrides = {}): Container {
     entendimento: o.entendimento !== undefined ? o.entendimento : porta && env.UNDERSTANDING_LLM ? entendimentoLlm(porta) : null,
     persona: o.persona ?? kaki, clock: relogio, logger,
   })
-  return { env, dados, cal, relogio, sessoes, casos, pipeline, logger }
+  // Pedidos das páginas usam o mesmo relógio e a mesma fila do chat: o caso é um só, venha de onde vier.
+  const pedidos = new PedidoService({ dados, sessoes, casos, clock: relogio })
+  return { env, dados, cal, relogio, sessoes, casos, pipeline, pedidos, logger }
 }
 
 let unico: Container | null = null

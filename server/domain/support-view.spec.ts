@@ -42,11 +42,20 @@ describe('perguntas frequentes com fonte da base atual', () => {
   })
 
   it('as três têm fonte', () => {
-    expect(perguntasFrequentes(dados.kb)).toEqual([
+    expect(perguntasFrequentes(dados.kb).map(({ pergunta, kbId }) => ({ pergunta, kbId }))).toEqual([
       { pergunta: 'Quando cai meu resgate?', kbId: 'KB-006' },
       { pergunta: 'Qual a diferença entre rentabilidade bruta e líquida?', kbId: 'KB-009' },
       { pergunta: 'O CDB tem garantia?', kbId: 'KB-013' },
     ])
+  })
+
+  it('a resposta abre na página: cada pergunta traz o artigo da própria fonte', () => {
+    for (const f of perguntasFrequentes(dados.kb)) {
+      expect(f.artigo?.id, f.pergunta).toBe(f.kbId)
+      expect(f.artigo?.blocos.length, f.pergunta).toBeGreaterThan(0)
+    }
+    const resgate = perguntasFrequentes(dados.kb)[0]!.artigo!
+    expect(resgate.titulo).toBe(dados.kb.find((a) => a.id === 'KB-006')!.titulo)
   })
 
   it('mesmo sem a KB-006 na base, a busca não cai na KB-007 antiga', () => {
@@ -80,6 +89,8 @@ describe('minhas conversas', () => {
 
   it('nenhum dado sensível do caso vai para a tela', () => {
     const v = atendimento('2026-11-18T14:00-03:00', [caso({ resumo: ['Marta, 63 anos'] })])
-    expect(JSON.stringify(v)).not.toMatch(/cpf|\*\*\*\.|resumo|63 anos/i)
+    // Só os casos: os artigos da base são públicos e citam "CPF" como orientação.
+    expect(JSON.stringify(v.casos)).not.toMatch(/cpf|\*\*\*\.|resumo|63 anos/i)
+    expect(Object.keys(v.casos[0]!).sort()).toEqual(['criadoEm', 'motivo', 'protocolo', 'status'])
   })
 })

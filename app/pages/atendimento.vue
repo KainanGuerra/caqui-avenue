@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { AtendimentoVista } from '~/types'
+import type { AtendimentoVista, TipoPedido } from '~/types'
 import { dataCurta } from '~/utils/moeda'
-import { PEDIDOS } from '~/utils/pedidos'
 
 useHead({ title: 'Atendimento · Kaki' })
 
@@ -9,10 +8,11 @@ const chat = useChat()
 const acesso = useAcesso()
 
 // Tudo o que decide a página (há pessoa agora, retorno, fontes, casos) vem do servidor; a tela só exibe e envia intenção.
+// Segurança, especialista e pessoa são registrados aqui; só "Pergunte à Kaki" abre a conversa (D16). A pessoa fica no fim, discreta (D17).
 const atendimento = ref<AtendimentoVista | null>(null)
 const falhou = ref(false)
 const duvida = ref('')
-const protocoloRegistrado = ref('')
+const pedido = usePedido('Atendimento')
 const SUGESTOES_NO_CARD = 3
 
 async function carregar() {
@@ -34,19 +34,20 @@ async function perguntar(texto: string) {
   await chat.enviar(texto)
 }
 
-// Fora do horário o pedido de pessoa vira protocolo no servidor; ele só aparece aqui quando a resposta o traz.
-async function registrarDemanda() {
-  const r = await chat.enviar(PEDIDOS.pessoa)
-  if (r?.protocolo) protocoloRegistrado.value = r.protocolo
+// O servidor decide a ação (pessoa agora ou protocolo) e devolve o texto com o protocolo; "Minhas conversas" é relida.
+async function pedir(tipo: TipoPedido) {
+  await pedido.pedir(tipo)
   await carregar()
 }
+
+const faqItens = computed(() => (atendimento.value?.faq ?? []).map((f) => ({ label: f.pergunta, value: f.pergunta, artigo: f.artigo })))
 </script>
 
 <template>
   <div class="mx-auto max-w-3xl space-y-6 pt-2">
     <header>
       <h1 class="text-[1.75rem] leading-9 font-semibold text-highlighted">Atendimento</h1>
-      <p class="text-muted">Pergunte à Kaki ou fale com uma pessoa. Você não precisa repetir o que já contou.</p>
+      <p class="text-muted">Pergunte à Kaki ou encontre a resposta aqui. Você não precisa repetir o que já contou.</p>
     </header>
 
     <section class="space-y-3 rounded-xl border border-default bg-default p-4" aria-labelledby="titulo-pergunte">
@@ -75,43 +76,29 @@ async function registrarDemanda() {
         <h2 id="titulo-seguranca" class="text-sm font-semibold">Suspeita de golpe? Segurança 24h, sem fila</h2>
       </div>
       <p class="text-sm text-default">A Caqui nunca liga pedindo código, senha, Pix de teste ou app de acesso remoto.</p>
-      <UButton color="error" size="lg" block label="Falar com a segurança agora" @click="perguntar(PEDIDOS.seguranca)" />
+      <PedidoRegistrado v-if="pedido.resultados.value.seguranca" :resultado="pedido.resultados.value.seguranca" />
+      <template v-else>
+        <UButton color="error" size="lg" block label="Falar com a segurança agora" :loading="pedido.pedindo.value === 'seguranca'" data-testid="pedir-seguranca" @click="pedir('seguranca')" />
+        <p v-if="pedido.falhou.value === 'seguranca'" class="text-sm text-error" role="alert">Não consegui registrar agora. Tente de novo em instantes.</p>
+      </template>
     </section>
 
     <template v-if="atendimento">
-      <section class="space-y-3 rounded-xl border border-default bg-default p-4" aria-labelledby="titulo-pessoa" data-testid="atendimento-pessoa">
-        <div class="flex items-start gap-2">
-          <span class="mt-2.5 size-2.5 shrink-0 rounded-full" :class="atendimento.humanoDisponivel ? 'bg-success' : 'bg-(--ui-border-accented)'" aria-hidden="true" />
-          <h2 id="titulo-pessoa" class="text-[1.375rem] leading-[1.875rem] font-semibold text-highlighted">
-            {{ atendimento.humanoDisponivel ? 'Uma pessoa pode te atender agora' : `Atendimento volta ${atendimento.retorno}` }}
-          </h2>
-        </div>
-
-        <template v-if="atendimento.humanoDisponivel">
-          <p class="text-sm text-muted">Quem atender já vê esta conversa e seu protocolo.</p>
-          <UButton size="lg" block label="Falar com uma pessoa" @click="perguntar(PEDIDOS.pessoa)" />
-        </template>
-        <template v-else>
-          <p v-if="protocoloRegistrado" class="text-sm text-default" role="status" data-testid="protocolo-registrado">
-            Registramos sua demanda no protocolo <strong class="font-semibold whitespace-nowrap text-highlighted">{{ protocoloRegistrado }}</strong> e retornamos {{ atendimento.retorno }}.
-          </p>
-          <template v-else>
-            <p class="text-sm text-muted">Pessoas atendem {{ atendimento.horario }}, todos os dias. Registre sua demanda e retornamos {{ atendimento.retorno }}.</p>
-            <UButton size="lg" block label="Registrar minha demanda" :loading="chat.enviando.value" @click="registrarDemanda" />
-          </template>
-          <p v-if="chat.erro.value" class="text-sm text-error" role="alert">{{ chat.erro.value }}</p>
-        </template>
-
-        <button type="button" class="flex w-full items-center gap-3 border-t border-default pt-3 text-left" data-testid="atendimento-especialista" @click="perguntar(atendimento.especialista.pergunta)">
-          <UIcon name="i-lucide-calendar" class="size-5 shrink-0 text-muted" />
-          <span class="min-w-0 flex-1">
-            <span class="block text-sm font-semibold text-highlighted">{{ atendimento.especialista.pergunta }}</span>
-            <span class="block text-sm text-muted">
+      <section class="space-y-3 rounded-xl border border-default bg-default p-4" aria-label="Especialista" data-testid="atendimento-especialista">
+        <div class="flex items-start gap-3">
+          <UIcon name="i-lucide-calendar" class="mt-0.5 size-5 shrink-0 text-muted" />
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold text-highlighted">{{ atendimento.especialista.pergunta }}</p>
+            <p class="text-sm text-muted">
               Isso é com um especialista, com agendamento<template v-if="atendimento.especialista.kbId"> ({{ atendimento.especialista.kbId }})</template>
-            </span>
-          </span>
-          <UIcon name="i-lucide-chevron-right" class="size-5 shrink-0 text-muted" />
-        </button>
+            </p>
+          </div>
+        </div>
+        <PedidoRegistrado v-if="pedido.resultados.value.especialista" :resultado="pedido.resultados.value.especialista" />
+        <template v-else>
+          <UButton color="neutral" variant="outline" block label="Pedir um especialista" :loading="pedido.pedindo.value === 'especialista'" data-testid="pedir-especialista" @click="pedir('especialista')" />
+          <p v-if="pedido.falhou.value === 'especialista'" class="text-sm text-error" role="alert">Não consegui registrar agora. Tente de novo em instantes.</p>
+        </template>
       </section>
 
       <section v-if="atendimento.casos.length" class="space-y-3" aria-labelledby="titulo-conversas" data-testid="minhas-conversas">
@@ -130,17 +117,28 @@ async function registrarDemanda() {
 
       <section class="space-y-3" aria-labelledby="titulo-faq">
         <h2 id="titulo-faq" class="text-[1.375rem] leading-[1.875rem] font-semibold text-highlighted">Perguntas frequentes</h2>
-        <ul class="divide-y divide-default rounded-xl border border-default bg-default">
-          <li v-for="f in atendimento.faq" :key="f.pergunta">
-            <button type="button" class="flex w-full items-center gap-3 p-4 text-left transition hover:bg-elevated" @click="perguntar(f.pergunta)">
-              <span class="min-w-0 flex-1">
-                <span class="block text-highlighted">{{ f.pergunta }}</span>
-                <span v-if="f.kbId" class="block text-xs text-muted">Fonte: {{ f.kbId }}</span>
-              </span>
-              <UIcon name="i-lucide-chevron-right" class="size-5 shrink-0 text-muted" />
-            </button>
-          </li>
-        </ul>
+        <!-- A resposta abre aqui, com o artigo da base; se a pergunta não tiver artigo atual, ela vai à Kaki. -->
+        <UAccordion :items="faqItens" class="rounded-xl border border-default bg-default px-4" :ui="{ label: 'text-base text-highlighted text-left' }" data-testid="faq">
+          <template #body="{ item }">
+            <ArtigoLeitura v-if="item.artigo" :artigo="item.artigo" />
+            <UButton v-else variant="link" color="primary" class="px-0" label="Perguntar à Kaki" @click="perguntar(item.label)" />
+          </template>
+        </UAccordion>
+      </section>
+
+      <!-- A regra 1 pede a saída para uma pessoa visível; ela fica por último, discreta, depois de tudo que resolve sozinho (D17). -->
+      <section class="space-y-2 border-t border-default pt-4 text-sm" aria-label="Falar com uma pessoa" data-testid="atendimento-pessoa">
+        <PedidoRegistrado v-if="pedido.resultados.value.pessoa" :resultado="pedido.resultados.value.pessoa" :acompanhar="pedido.resultados.value.pessoa.humanoDisponivel" />
+        <template v-else>
+          <p class="text-muted">
+            Não encontrou o que precisava?
+            <UButton variant="link" color="primary" class="p-0 align-baseline underline underline-offset-2" label="Prefere falar com uma pessoa?" :loading="pedido.pedindo.value === 'pessoa'" data-testid="pedir-pessoa" @click="pedir('pessoa')" />
+          </p>
+          <p class="text-xs text-muted">
+            {{ atendimento.humanoDisponivel ? `Pessoas atendem ${atendimento.horario}. Quem atender já vê o que você contou.` : `Pessoas atendem ${atendimento.horario}. Registramos agora e retornamos ${atendimento.retorno}.` }}
+          </p>
+          <p v-if="pedido.falhou.value === 'pessoa'" class="text-error" role="alert">Não consegui registrar agora. Tente de novo em instantes.</p>
+        </template>
       </section>
     </template>
     <UAlert v-else-if="falhou" color="warning" variant="subtle" icon="i-lucide-wifi-off" title="Não consegui carregar o atendimento agora." description="A segurança continua 24h no botão acima." :actions="[{ label: 'Tentar de novo', color: 'neutral', variant: 'outline', onClick: carregar }]" />

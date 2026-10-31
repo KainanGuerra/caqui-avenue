@@ -8,6 +8,7 @@ export type Mensagem = {
   acao?: string
   fontes?: Fonte[]
   protocolo?: string
+  oferecerHumano?: boolean
 }
 
 export type ClienteResumo = { id: string; nome: string; idade: number; persona: string | null }
@@ -36,6 +37,12 @@ export type Caso = {
 }
 
 // Dashboard do cliente (só leitura, centavos inteiros). Espelha server/domain/account-view.ts.
+/** Quando cai um resgate pedido agora, calculado pelo servidor com o relógio e o calendário (regra 1). */
+export type PrazoResgate =
+  | { tipo: 'liquida'; pagamento: string; detalhe: string; fontes: string[] }
+  | { tipo: 'em_carencia'; disponivelEm: string; fontes: string[] }
+  | { tipo: 'no_vencimento'; vencimento: string | null; fontes: string[] }
+
 export type PosicaoVista = {
   id: string
   produto: string
@@ -46,6 +53,7 @@ export type PosicaoVista = {
   valorAplicadoCentavos: number
   saldoBrutoCentavos: number
   rendimentoBrutoCentavos: number
+  resgate: PrazoResgate | null
 }
 
 export type OperacaoVista = {
@@ -54,7 +62,6 @@ export type OperacaoVista = {
   valorCentavos: number
   pedidoEm: string
   status: 'pendente' | 'em_processamento' | 'liquidada' | 'recusada'
-  liquidacaoPrevista: string | null
   nomeProduto: string | null
 }
 
@@ -91,8 +98,17 @@ export type ContaVista = {
   avisos: Aviso[]
 }
 
+// Artigo da base pronto para ler, sem HTML. Espelha server/domain/kb-reading.ts.
+export type Trecho = { texto: string; forte: boolean }
+export type BlocoArtigo =
+  | { tipo: 'paragrafo'; trechos: Trecho[] }
+  | { tipo: 'lista'; ordenada: boolean; itens: Trecho[][] }
+  | { tipo: 'tabela'; cabecalho: string[]; linhas: string[][] }
+export type ArtigoLeitura = { id: string; titulo: string; revisadoEm: string; blocos: BlocoArtigo[] }
+
 // Página de Atendimento do cliente. Espelha server/domain/support-view.ts.
 export type PerguntaComFonte = { pergunta: string; kbId: string | null }
+export type PerguntaFrequente = PerguntaComFonte & { artigo: ArtigoLeitura | null }
 
 export type CasoVista = { protocolo: string; motivo: string; criadoEm: string; status: 'respondido' | 'em_andamento' }
 
@@ -100,9 +116,26 @@ export type AtendimentoVista = {
   humanoDisponivel: boolean
   horario: string
   retorno: string | null
-  faq: PerguntaComFonte[]
+  faq: PerguntaFrequente[]
   especialista: PerguntaComFonte
   casos: CasoVista[]
 }
+
+// Pedido feito numa página. Espelha server/application/page-request-service.ts.
+export type TipoPedido = 'pessoa' | 'especialista' | 'seguranca'
+export type PaginaPedido = 'Atendimento' | 'Investir'
+export type ResultadoPedido = {
+  acao: string
+  protocolo: string
+  humanoDisponivel: boolean
+  retorno: string | null
+  texto: string
+  orientacao: ArtigoLeitura[]
+}
+
+// Páginas Investir e Aprender. Espelham server/domain/invest-view.ts e learning-view.ts.
+export type ProdutoVista = { codigo: string; nome: string; rentabilidade: string; liquidez: string; imposto: string; kbId: string | null }
+export type InvestirVista = { produtos: ProdutoVista[]; artigos: ArtigoLeitura[]; especialista: PerguntaComFonte }
+export type TemaAprender = { titulo: string; artigos: ArtigoLeitura[] }
 
 export type ResumoFila = { emAberto: number; golpe: number; prioridade: number; assumidos: number; resolvidos: number }

@@ -25,10 +25,9 @@ describe('perfil do cliente', () => {
 })
 
 describe('sugestões pelo tipo de cliente', () => {
-  it('idoso recebe segurança e atendimento primeiro, em linguagem simples', () => {
+  it('idoso recebe segurança primeiro, em linguagem simples', () => {
     const s = sugerir(contexto('C-0001')).sugestoes
-    expect(s[0]).toBe('Quero falar com uma pessoa')
-    expect(s).toContain('Como sei se uma ligação ou mensagem é golpe?')
+    expect(s[0]).toBe('Como sei se uma ligação ou mensagem é golpe?')
     expect(s.join(' ')).not.toMatch(/alíquota/)
   })
 
@@ -92,13 +91,13 @@ describe('sugestões pelo que a pessoa digita', () => {
   })
 
   it('o que começa igual ao digitado vem primeiro', () => {
-    expect(sugerir(contexto('C-0002', { rascunho: 'quero falar' })).sugestoes[0]).toBe('Quero falar com uma pessoa')
+    expect(sugerir(contexto('C-0002', { rascunho: 'quero enc' })).sugestoes[0]).toBe('Quero encerrar minha conta')
   })
 
   it('digitação sem correspondência volta às sugestões do perfil', () => {
     const r = sugerir(contexto('C-0001', { rascunho: 'zzzz' }))
     expect(r.porDigitacao).toBe(false)
-    expect(r.sugestoes[0]).toBe('Quero falar com uma pessoa')
+    expect(r.sugestoes).toEqual(sugerir(contexto('C-0001')).sugestoes)
   })
 
   it('uma letra só não filtra nada', () => {
@@ -120,6 +119,18 @@ describe('sugestões pela conversa', () => {
     const s = sugerir(contexto('C-0003', { ultimaAcao: 'encaminhar_especialista' })).sugestoes
     expect(s).toContain('Qual o prazo de resposta do meu protocolo?')
     expect(s.some((x) => x.startsWith('O que é um CDB') || x.startsWith('Qual a diferença'))).toBe(true)
+  })
+
+  it('nenhuma sugestão pede uma pessoa, em nenhum perfil, contexto ou digitação (D17)', () => {
+    const acoes = [null, 'responder', 'encaminhar_humano', 'protocolo', 'seguranca_imediata', 'encaminhar_especialista'] as const
+    for (const id of ['C-0001', 'C-0002', 'C-0003']) {
+      for (const ultimaAcao of acoes) {
+        for (const rascunho of ['', 'quero falar', 'pessoa', 'atendente', 'humano']) {
+          const s = sugerir(contexto(id, { ultimaAcao, rascunho }), 30).sugestoes.join(' | ')
+          expect(s, `${id} ${ultimaAcao} "${rascunho}"`).not.toMatch(/uma pessoa|falar com|atendente|humano/i)
+        }
+      }
+    }
   })
 
   it('com atendente na conversa não há sugestões', () => {

@@ -32,6 +32,13 @@ const statusCaso = computed(() => {
 })
 const nomeAtendente = computed(() => chat.caso.value?.atendente ?? null)
 
+// A pessoa só vira botão quando a Kaki acabou de dizer que não resolve (D17); com caso aberto, alguém já vai atender.
+const ofertaPessoa = computed(() => {
+  const ultima = chat.mensagens.value.at(-1)
+  const casoAberto = chat.caso.value && chat.caso.value.status !== 'resolvido'
+  return ultima?.papel === 'agente' && ultima.oferecerHumano === true && !casoAberto
+})
+
 async function enviar(t: string) {
   texto.value = ''
   await chat.enviar(t)
@@ -54,11 +61,10 @@ async function enviar(t: string) {
               <p class="truncate font-semibold leading-tight">Kaki <span class="font-normal text-muted">· assistente virtual da Caqui</span></p>
               <p class="truncate text-xs text-muted max-sm:hidden">Conversando como {{ acesso.nome.value }}</p>
             </div>
-            <!-- Selo e botão não cabem lado a lado em 375px: no celular o botão sobe para a linha do nome e o selo vai logo abaixo. -->
+            <!-- O selo informa o horário da pessoa sem ser um atalho: a Kaki tenta antes e oferece a pessoa quando não resolve (D17). -->
             <UBadge :color="chat.humanoDisponivel.value ? 'success' : 'warning'" variant="subtle" :icon="chat.humanoDisponivel.value ? 'i-lucide-headset' : 'i-lucide-moon'" class="max-sm:order-last">
               {{ chat.humanoDisponivel.value ? 'Pessoa disponível agora' : 'Pessoa volta às 8h · segurança 24h' }}
             </UBadge>
-            <UButton color="neutral" variant="outline" icon="i-lucide-headset" label="Falar com uma pessoa" class="max-sm:min-h-11" :disabled="chat.enviando.value || comAtendente" data-testid="pedir-pessoa" @click="enviar('Quero falar com uma pessoa')" />
           </div>
         </template>
 
@@ -66,6 +72,9 @@ async function enviar(t: string) {
         <div ref="rolagem" class="rolagem-chat flex-1 space-y-3 overflow-y-auto bg-elevated/40 p-3 [contain:size] sm:p-4" aria-live="polite" aria-label="Mensagens da conversa" data-testid="mensagens">
         <ChatMensagem :msg="{ papel: 'agente', texto: acesso.saudacao.value, em: '' }" />
         <ChatMensagem v-for="(m, i) in chat.mensagens.value" :key="i" :msg="m" :atendente="nomeAtendente" :cliente="acesso.nome.value" />
+          <div v-if="ofertaPessoa && !chat.enviando.value" class="flex justify-start pl-1" data-testid="oferta-pessoa">
+            <UButton color="primary" variant="soft" icon="i-lucide-headset" class="min-h-11" :label="chat.humanoDisponivel.value ? 'Falar com uma pessoa' : 'Registrar minha demanda'" @click="enviar('Quero falar com uma pessoa')" />
+          </div>
           <p v-if="chat.enviando.value && !comAtendente" class="flex items-center gap-2 text-sm italic text-muted"><UIcon name="i-lucide-loader-circle" class="size-4 animate-spin" />Kaki está escrevendo…</p>
         </div>
 

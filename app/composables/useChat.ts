@@ -1,4 +1,4 @@
-import type { CasoResumo, ContaVista, Mensagem } from '~/types'
+import type { CasoResumo, ContaVista, Mensagem, PaginaPedido, ResultadoPedido, TipoPedido } from '~/types'
 
 type Saida = { texto: string; comHumano: boolean; acao: string; protocolo: string | null }
 
@@ -12,6 +12,8 @@ export function useChat() {
   const mensagens = useState<Mensagem[]>('chat-mensagens', () => [])
   const caso = useState<CasoResumo | null>('chat-caso', () => null)
   const humanoDisponivel = useState('chat-humano', () => true)
+  // "das 8h às 20h": vem das mesmas constantes que decidem se há pessoa agora.
+  const horarioAtendimento = useState('chat-horario-atendimento', () => '')
   const enviando = useState('chat-enviando', () => false)
   const erro = useState('chat-erro', () => '')
   const sugestoes = useState<string[]>('chat-sugestoes', () => [])
@@ -40,10 +42,11 @@ export function useChat() {
   async function atualizar() {
     if (!acesso.sessaoId.value) return
     try {
-      const r = await $fetch<{ mensagens: Mensagem[]; caso: CasoResumo | null; humanoDisponivel: boolean }>(`/api/chat/${acesso.sessaoId.value}`)
+      const r = await $fetch<{ mensagens: Mensagem[]; caso: CasoResumo | null; humanoDisponivel: boolean; horario: string }>(`/api/chat/${acesso.sessaoId.value}`)
       mensagens.value = r.mensagens
       caso.value = r.caso
       humanoDisponivel.value = r.humanoDisponivel
+      horarioAtendimento.value = r.horario
     } catch (e) {
       // O servidor reiniciou e esqueceu a sessão: volta à entrada em vez de ficar com a tela parada.
       if ((e as { statusCode?: number }).statusCode === 404) { parar(); await acesso.sair() }
@@ -98,6 +101,19 @@ export function useChat() {
     }
   }
 
+  // Pedido de pessoa, especialista ou segurança feito numa página: entra no mesmo caso e no histórico da conversa,
+  // por isso relê o estado (o selo do Atendimento acende e a conversa já mostra o pedido).
+  async function registrarPedido(tipo: TipoPedido, pagina: PaginaPedido): Promise<ResultadoPedido | null> {
+    if (!acesso.sessaoId.value) return null
+    try {
+      return await $fetch<ResultadoPedido>(`/api/chat/${acesso.sessaoId.value}/pedidos`, { method: 'POST', body: { tipo, pagina } })
+    } catch {
+      return null
+    } finally {
+      await atualizar()
+    }
+  }
+
   async function sair() {
     parar()
     mensagens.value = []
@@ -107,7 +123,7 @@ export function useChat() {
   }
 
   return {
-    sessaoId: acesso.sessaoId, cliente: acesso.cliente, saudacao: acesso.saudacao, mensagens, caso, humanoDisponivel, enviando, erro, sugestoes,
-    sugestoesPorDigitacao, perfil, conta, horarioSimulado, carregarSugestoes, carregarConta, atualizar, acompanhar, parar, iniciar, enviar, sair,
+    sessaoId: acesso.sessaoId, cliente: acesso.cliente, saudacao: acesso.saudacao, mensagens, caso, humanoDisponivel, horarioAtendimento, enviando, erro, sugestoes,
+    sugestoesPorDigitacao, perfil, conta, horarioSimulado, carregarSugestoes, carregarConta, atualizar, acompanhar, parar, iniciar, enviar, registrarPedido, sair,
   }
 }

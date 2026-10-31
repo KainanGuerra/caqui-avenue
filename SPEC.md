@@ -44,7 +44,7 @@ Efeito adicional não contado acima: "onde está meu dinheiro" tem 44% de recont
 ## 4. Como a confiança aparece?
 
 - **Fonte em toda resposta factual**: chip com o artigo (KB-xxx) ou o dado da conta; artigo desatualizado (KB-007, corte de 15h) nunca responde.
-- **Saída para uma pessoa sempre à vista**: botão "Falar com uma pessoa" fixo; das 8h às 20h com tempo estimado, fora disso com protocolo e prazo de retorno; segurança a qualquer hora.
+- **Saída para uma pessoa sem disputar atenção** (D17): linha discreta "Prefere falar com uma pessoa?" no fim do Atendimento, e o botão "Falar com uma pessoa" dentro da resposta em que a Kaki não sabe ou não entendeu pela segunda vez; das 8h às 20h com tempo estimado, fora disso com protocolo e prazo de retorno; segurança a qualquer hora.
 - **Protocolo à vista** e a frase "você não precisa repetir nada: quem atende vê esta conversa".
 - **Golpe interrompe tudo** antes de responder a pergunta original.
 - **CPF só mascarado** e nenhum dado de outro cliente: o motor só carrega a conta da sessão.

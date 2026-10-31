@@ -168,6 +168,7 @@ DIAGRAMA_DE = {
     'redacao-e-validacao.feature': 'sequencia-pergunta-de-prazo',
     'home.feature': 'fluxo-home',
     'atendimento.feature': 'fluxo-atendimento',
+    'paginas-do-cliente.feature': 'fluxo-paginas-do-cliente',
 }
 
 
@@ -243,7 +244,7 @@ def build(images):
 
     s += head('Mapa de jornada (1 de 2)', 'Dona Marta e Rafael')
     s += mapa('Dona Marta: "quero tirar tudo porque meu sobrinho mandou"', [
-        ['1 Chega', 'Abre o chat, insegura', 'Identifica a sess\u00e3o do cliente; sauda\u00e7\u00e3o da persona', 'Bot\u00e3o "Falar com uma pessoa" sempre \u00e0 vista', 'geral 1'],
+        ['1 Chega', 'Abre o chat, insegura', 'Identifica a sess\u00e3o do cliente; sauda\u00e7\u00e3o da persona', 'Selo com o hor\u00e1rio da pessoa; "Prefere falar com uma pessoa?" no fim do Atendimento', 'geral 1'],
         ['2 Pede', 'Escreve que quer resgatar tudo por causa do sobrinho; ansiosa', 'Detecta idade (63), terceiro pressionando e resgate total: sinal de vulner\u00e1vel', '-', '6'],
         ['3 Recebe', 'L\u00ea uma resposta calma, sem julgamento', 'N\u00e3o executa nada; oferece humano priorit\u00e1rio; lembra que transfer\u00eancia s\u00f3 vai para conta de mesma titularidade', 'Protocolo e prazo \u00e0 vista', '6, KB-018'],
         ['4 \u00c9 atendida', 'Fala com uma pessoa e n\u00e3o repete nada', 'Caso entra na fila com prioridade de idosa e hist\u00f3rico', 'A pessoa j\u00e1 sabe o que ela contou', 'KB-028']], ORANGE)
@@ -321,10 +322,13 @@ def build(images):
                 ['Golpe segue \u00e0 seguran\u00e7a; recomenda\u00e7\u00e3o segue ao especialista.', 'Fora do hor\u00e1rio o caso entra na fila \u00e0s 8h.', 'Fechar guarda o hist\u00f3rico pelo protocolo.'])
     s += pagina('Home do cliente', 'O que est\u00e1 em andamento, sem a tela calcular nada',
                 'O servidor monta patrim\u00f4nio, etapas, aloca\u00e7\u00e3o e avisos; a tela s\u00f3 exibe.', 'fluxo-home', 360,
-                ['As etapas usam o corte das 16h e os dias \u00fateis, com fonte KB-006 e o id da opera\u00e7\u00e3o.', 'Feriado nos pr\u00f3ximos 5 dias \u00fateis vira aviso; feriado no fim de semana n\u00e3o.', 'Resgatar abre a conversa com "Quando cai meu resgate?".'], lado=True)
+                ['As etapas usam o corte das 16h e os dias \u00fateis, com fonte KB-006 e o id da opera\u00e7\u00e3o.', 'Feriado nos pr\u00f3ximos 5 dias \u00fateis vira aviso; feriado no fim de semana n\u00e3o.', 'Nenhuma a\u00e7\u00e3o abre a conversa: Resgatar leva \u00e0 Carteira e Investir \u00e0 p\u00e1gina de produtos.'], lado=True)
     s += pagina('Atendimento do cliente', 'Uma p\u00e1gina, dois estados, pelo rel\u00f3gio do servidor',
-                'A tela s\u00f3 exibe e envia a inten\u00e7\u00e3o; o pipeline decide a a\u00e7\u00e3o.', 'fluxo-atendimento', 360,
-                ['Das 8h \u00e0s 20h h\u00e1 pessoa agora; fora disso, "Registrar minha demanda" e o protocolo s\u00f3 depois do registro.', 'Seguran\u00e7a 24h, sem fila: o bot\u00e3o envia o relato de golpe e vira seguran\u00e7a imediata.', 'Perguntas frequentes mostram a fonte da base atual (KB-006, nunca a KB-007).'], lado=True)
+                'A tela s\u00f3 exibe e envia a inten\u00e7\u00e3o; o servidor decide a a\u00e7\u00e3o e devolve o protocolo.', 'fluxo-atendimento', 360,
+                ['A pessoa \u00e9 a \u00faltima linha, discreta; fora do hor\u00e1rio, o protocolo s\u00f3 depois do registro. No chat, ela vira bot\u00e3o quando a Kaki n\u00e3o resolve.', 'Seguran\u00e7a 24h, sem fila: o pedido \u00e9 registrado na p\u00e1gina, com os passos da KB-020.', 'Pergunta frequente abre o artigo da base atual na p\u00e1gina (KB-006, nunca a KB-007).'], lado=True)
+    s += pagina('P\u00e1ginas do cliente', 'Rodap\u00e9 de abas e a conversa como \u00faltima alternativa',
+                'Carteira, Investir e Aprender respondem com dados do servidor.', 'fluxo-paginas-do-cliente', 360,
+                ['Carteira: prazo de resgate por posi\u00e7\u00e3o, pelo corte das 16h e pelos dias \u00fateis (KB-006).', 'Investir: produtos na ordem dos dados, sem ranking; especialista registrado na p\u00e1gina (KB-029).', 'Aprender: artigos atuais por tema, nunca a KB-007.'], lado=True)
     s += pagina('Liquidação passo a passo', 'Como a data de pagamento \u00e9 calculada',
                 'Para a sala validar a conta.', 'fluxo-liquidacao', 290,
                 ['Corte das 16h; fim de semana e feriado v\u00e3o para o pr\u00f3ximo dia \u00fatil.', 'Exemplo do case: sexta 30/10 \u00e0s 17h, feriado na segunda: pagamento do fundo em 05/11.', 'A data \u00e9 sempre calculada, nunca lida da planilha.'])
@@ -341,7 +345,8 @@ def build(images):
     s += head('Pontos de confian\u00e7a', 'Onde o cliente v\u00ea que pode acreditar na resposta')
     s += [table([['Momento', 'O que o cliente v\u00ea', 'Por que gera confian\u00e7a'],
                  ['Qualquer resposta factual', 'Chip com a fonte: artigo KB-xxx ou dado da conta', 'Mostra de onde veio a informa\u00e7\u00e3o'],
-                 ['Qualquer passo', 'Bot\u00e3o "Falar com uma pessoa"', 'Sa\u00edda segura, sem menu intermedi\u00e1rio'],
+                 ['Qualquer passo', 'Linha discreta "Prefere falar com uma pessoa?" no Atendimento', 'Sa\u00edda segura, sem disputar aten\u00e7\u00e3o com as respostas'],
+                 ['Quando a Kaki n\u00e3o resolve', 'Bot\u00e3o "Falar com uma pessoa" dentro da resposta', 'A pessoa aparece na hora certa, sem o cliente procurar'],
                  ['Qualquer encaminhamento', 'Protocolo e prazo \u00e0 vista', 'O caso n\u00e3o some e o cliente n\u00e3o repete a demanda'],
                  ['Suspeita de golpe', 'Orienta\u00e7\u00e3o imediata e bloqueio de acesso (simulado)', 'A seguran\u00e7a age na hora, a qualquer hora'],
                  ['Fora do hor\u00e1rio', 'Aviso claro de que a pessoa volta \u00e0s 8h, com protocolo', 'N\u00e3o promete o que n\u00e3o pode cumprir'],

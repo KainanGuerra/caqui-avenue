@@ -77,6 +77,27 @@ describe('pipeline: regras de ponta a ponta no modo template', () => {
     expect(r2.texto).toContain('pessoa')
   })
 
+  it('D17: a pessoa só é oferecida na mensagem quando a Kaki não resolve', async () => {
+    const { conversa } = novo()
+    const k = conversa('C-0002')
+    const ultima = () => k.sessao.historico.at(-1)!
+    await k.diz('qual o horário de corte do CDB?')
+    expect(ultima().oferecerHumano).toBeUndefined()
+    await k.diz('asdf')
+    expect(ultima().oferecerHumano).toBeUndefined()
+    await k.diz('não é isso')
+    expect(ultima().oferecerHumano).toBe(true)
+    await k.diz('não é isso de novo')
+    expect(ultima()).toMatchObject({ acao: 'encaminhar_humano' })
+    expect(ultima().oferecerHumano).toBeUndefined()
+  })
+
+  it('D17: sem a informação na base, a resposta oferece a pessoa', async () => {
+    const k = novo().conversa('C-0002')
+    await k.diz('qual o endereço da sede da Caqui?')
+    expect(k.sessao.historico.at(-1)).toMatchObject({ acao: 'responder', oferecerHumano: true })
+  })
+
   it('regra 8: entender uma pergunta zera o contador de mal-entendidos', async () => {
     const { conversa } = novo()
     const k = conversa('C-0002')

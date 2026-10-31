@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { OperacaoVista } from '~/types'
-import { dataCurta, reais } from '~/utils/moeda'
+import { dataCurta } from '~/utils/moeda'
 
 const props = defineProps<{ operacao: OperacaoVista }>()
+const { valor } = useOcultarValores()
 
 const TIPO: Record<OperacaoVista['tipo'], { rotulo: string; icone: string }> = {
   aplicacao: { rotulo: 'Aplicação', icone: 'i-lucide-arrow-down-to-line' },
@@ -25,10 +26,10 @@ const status = computed(() => STATUS[props.operacao.status])
     <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-elevated text-muted"><UIcon :name="tipo.icone" class="size-4" /></span>
     <div class="min-w-0 flex-1">
       <p class="truncate text-sm font-medium">{{ tipo.rotulo }}<template v-if="operacao.nomeProduto"> · {{ operacao.nomeProduto }}</template></p>
-      <p class="text-xs text-muted">{{ dataCurta(operacao.pedidoEm) }}<template v-if="operacao.liquidacaoPrevista"> · previsto {{ dataCurta(operacao.liquidacaoPrevista) }}</template></p>
+      <p class="text-xs text-muted">{{ dataCurta(operacao.pedidoEm) }}</p>
     </div>
     <div class="text-right">
-      <p class="text-sm font-medium tabular-nums">{{ reais(operacao.valorCentavos) }}</p>
+      <p class="text-sm font-medium tabular-nums">{{ valor(operacao.valorCentavos) }}</p>
       <UBadge :color="status.cor" variant="subtle" size="sm">{{ status.rotulo }}</UBadge>
     </div>
   </li>

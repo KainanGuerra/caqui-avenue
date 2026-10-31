@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { PEDIDOS } from '~/utils/pedidos'
-
 useHead({ title: 'Início · Kaki' })
 
 const chat = useChat()
@@ -15,14 +13,7 @@ const statusCaso = computed(() => {
   return !c ? '' : c.status === 'assumido' ? `com ${c.atendente ?? 'um atendente'}` : c.status === 'resolvido' ? 'resolvido' : 'na fila'
 })
 const casoAberto = computed(() => chat.caso.value && chat.caso.value.status !== 'resolvido')
-const disponibilidade = computed(() => (chat.humanoDisponivel.value ? 'Uma pessoa da Caqui está disponível agora.' : 'Fora do horário: a pessoa volta às 8h. Golpe e segurança, 24h.'))
-
-async function perguntar(texto: string) {
-  await navigateTo('/conversa')
-  await chat.enviar(texto)
-}
-// A página de Atendimento mostra se há pessoa agora e decide entre falar já ou registrar a demanda.
-const abrirAtendimento = () => navigateTo('/atendimento')
+// Nenhuma ação abre a conversa: cada uma leva à página que responde (D16). A conversa fica no Atendimento.
 </script>
 
 <template>
@@ -33,7 +24,7 @@ const abrirAtendimento = () => navigateTo('/atendimento')
     </header>
 
     <template v-if="conta">
-      <EmAndamentoCard v-for="op in conta.emAndamento" :key="op.operacaoId" :operacao="op" :hoje="conta.hoje" @detalhes="perguntar(PEDIDOS.resgate)" />
+      <EmAndamentoCard v-for="op in conta.emAndamento" :key="op.operacaoId" :operacao="op" :hoje="conta.hoje" @detalhes="navigateTo('/carteira')" />
 
       <ResumoPatrimonio :conta="conta" />
 
@@ -55,8 +46,9 @@ const abrirAtendimento = () => navigateTo('/atendimento')
     <section class="space-y-3" aria-labelledby="titulo-acoes">
       <h2 id="titulo-acoes" class="text-xl font-semibold text-highlighted">O que você quer fazer?</h2>
       <div class="grid grid-cols-2 gap-3">
-        <AcaoRapida icone="i-lucide-arrow-up-right" titulo="Resgatar" subtitulo="Veja quando o dinheiro cai" data-testid="acao-resgatar" @click="perguntar(PEDIDOS.resgate)" />
-        <AcaoRapida icone="i-lucide-message-circle" titulo="Falar com uma pessoa" :subtitulo="chat.humanoDisponivel.value ? 'Disponível agora' : 'Volta às 8h'" @click="abrirAtendimento" />
+        <AcaoRapida icone="i-lucide-plus" titulo="Investir" subtitulo="Conheça os produtos" data-testid="acao-investir" @click="navigateTo('/investir')" />
+        <AcaoRapida icone="i-lucide-arrow-up-right" titulo="Resgatar" subtitulo="Veja quando o dinheiro cai" data-testid="acao-resgatar" @click="navigateTo('/carteira')" />
+        <AcaoRapida class="col-span-2" icone="i-lucide-message-circle" titulo="Atendimento" :subtitulo="chat.horarioAtendimento.value ? `${chat.horarioAtendimento.value}, todos os dias` : 'Pergunte à Kaki'" data-testid="acao-atendimento" @click="navigateTo('/atendimento')" />
       </div>
     </section>
 
@@ -64,19 +56,11 @@ const abrirAtendimento = () => navigateTo('/atendimento')
 
     <section class="space-y-3" aria-labelledby="titulo-proximos">
       <h2 id="titulo-proximos" class="text-xl font-semibold text-highlighted">Próximos passos</h2>
-      <UCard variant="outline" class="bg-default" :ui="{ body: 'space-y-2 sm:p-5' }" data-testid="conteudo-educativo">
+      <NuxtLink to="/aprender" class="block space-y-2 rounded-xl border border-default bg-default p-4 transition hover:bg-elevated sm:p-5" data-testid="conteudo-educativo">
         <UBadge color="neutral" variant="subtle" icon="i-lucide-sprout">Conteúdo educativo, não é recomendação</UBadge>
         <p class="font-semibold text-highlighted">Conheça como funciona a liquidez antes de investir.</p>
-        <p class="text-sm text-muted">Entenda quando você pode resgatar e quanto tempo o dinheiro leva para cair.</p>
-      </UCard>
-      <button type="button" class="flex w-full items-center gap-4 rounded-xl bg-marfim-300 p-5 text-left text-highlighted transition hover:bg-marfim-200 dark:bg-marfim-900 dark:hover:bg-marfim-800" data-testid="atendimento-humano" @click="abrirAtendimento">
-        <UIcon name="i-lucide-message-circle" class="size-6 shrink-0" />
-        <span class="min-w-0 flex-1">
-          <span class="block font-semibold">Falar com uma pessoa</span>
-          <span class="block text-sm text-toned">{{ disponibilidade }}</span>
-        </span>
-        <UIcon name="i-lucide-chevron-right" class="size-5 shrink-0" />
-      </button>
+        <p class="flex items-center justify-between gap-2 text-sm text-muted">Entenda quando você pode resgatar e quanto tempo o dinheiro leva para cair.<UIcon name="i-lucide-chevron-right" class="size-5 shrink-0" /></p>
+      </NuxtLink>
     </section>
   </div>
 </template>

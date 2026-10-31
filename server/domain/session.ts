@@ -9,6 +9,8 @@ export type Mensagem = {
   acao?: Acao
   fontes?: Fonte[]
   protocolo?: string
+  /** A Kaki não resolveu e oferece uma pessoa: só aqui a tela mostra o botão (D17). */
+  oferecerHumano?: boolean
 }
 
 export type Sessao = {
