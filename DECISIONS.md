@@ -117,3 +117,11 @@ Registro das decisões deste projeto, na ordem em que foram tomadas. Cada entrad
   - **Fora do corte:** espera estimada (não há dado real; a do painel é simulada, D10), "Bloquear meu acesso", "Fazer uma reclamação", "Encerrar minha conta" e a barra inferior de abas. A Home passa a levar "Falar com uma pessoa" para esta página.
 - **Por quê:** O estado, as fontes e o protocolo têm uma única origem (o servidor), e cada botão passa pela mesma política da conversa. Um ajuste de texto que desligue uma regra quebra `pedidos.spec.ts`.
 - **O que reabriria:** Espera estimada com dados reais de fila. Também o "simular horário" da conversa refletido aqui (hoje a página usa só o relógio do servidor, D8) e uma tela para reabrir conversas antigas pelo protocolo.
+
+## D14. Dados fictícios dentro do repositório
+
+- **Contexto:** Os dados do case ficavam só em `caqui-invest/dados`, que é outro repositório (ignorado aqui). Quem clonava este projeto precisava clonar o outro e colocá-lo na pasta certa, ou a tela e os testes não subiam.
+- **Alternativas consideradas:** (a) continuar exigindo o `caqui-invest/` ao lado; (b) submódulo git; (c) copiar `caqui-invest/dados` para `data/` na raiz e versionar.
+- **Escolha:** (c). `DADOS_DIR` passa a ter `./data` como padrão (env, testes, `eval-signals`, compose). Os dados continuam somente leitura e fora da imagem (`.dockerignore`): o compose os monta em `/dados`. O case (`CASE.md`) e o checador seguem em `caqui-invest/`, só para consulta.
+- **Por quê:** Um clone só basta para rodar e testar. Os dados são sintéticos e pequenos, então versioná-los não expõe nada nem pesa. O submódulo exigiria acesso e um passo a mais para cada pessoa do grupo.
+- **O que reabriria:** Uma nova versão dos dados no `caqui-invest`: a cópia precisa ser atualizada à mão (`rm -rf data && cp -R ../caqui-invest/dados ./data`), e os testes dizem se algo mudou.

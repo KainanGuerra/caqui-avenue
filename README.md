@@ -1,6 +1,6 @@
 # Kaki: atendimento da Caqui Invest
 
-Agente de atendimento para o Hands On com IA (31/10/2026): **o código decide, o LLM só redige.** Duas visões ligadas pelo mesmo caso: o chat do cliente e o painel do suporte. Tudo é fictício; o case, os dados e o checador estão em `caqui-invest/` (só consulta).
+Agente de atendimento para o Hands On com IA (31/10/2026): **o código decide, o LLM só redige.** Duas visões ligadas pelo mesmo caso: o chat do cliente e o painel do suporte. Tudo é fictício. Os dados do case estão em `data/` (cópia de `caqui-invest/dados`, D14); o case e o checador continuam em `caqui-invest/` (só consulta).
 
 - **Visão do cliente** (`/`): escolhe um cliente simulado e conversa com a Kaki. Fonte em cada resposta factual, botão "Falar com uma pessoa" sempre visível, protocolo à vista, letra grande, simulador de horário.
 - **Visão do suporte** (`/atendente`): fila ordenada (golpe, 60 anos ou mais, demais), motivos da decisão, resumo, fontes, conversa; assumir, responder e resolver. A resposta aparece no chat do cliente.
@@ -25,7 +25,7 @@ Sem LLM, as respostas vêm dos templates (modo `template`). Para usar um modelo,
 docker compose up --build        # http://localhost:3000
 ```
 
-Sem `.env` o agente sobe no modo template e com o painel de suporte aberto. As variáveis do `.env.example` (`LLM_*`, `ATENDENTE_PIN`, `RELOGIO`, `PORT`) são lidas pelo compose. Os dados do case entram como volume somente leitura (`./caqui-invest/dados`), nunca dentro da imagem; o container roda como usuário não root, com o sistema de arquivos em modo leitura e `healthcheck` em `/api/saude`. Parar: `docker compose down`.
+Sem `.env` o agente sobe no modo template e com o painel de suporte aberto. As variáveis do `.env.example` (`LLM_*`, `ATENDENTE_PIN`, `RELOGIO`, `PORT`) são lidas pelo compose. Os dados do case entram como volume somente leitura (`./data`), nunca dentro da imagem; o container roda como usuário não root, com o sistema de arquivos em modo leitura e `healthcheck` em `/api/saude`. Parar: `docker compose down`.
 
 ### Com hot reload
 

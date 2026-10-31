@@ -5,7 +5,7 @@ import { carregarDados } from '../server/infrastructure/data/dados'
 import { normalizar } from '../server/domain/normalize'
 import { detectarSinais, tem, type Sinal } from '../server/domain/signals'
 
-const dados = carregarDados(resolve(process.env.DADOS_DIR ?? 'caqui-invest/dados'))
+const dados = carregarDados(resolve(process.env.DADOS_DIR ?? 'data'))
 const detalhe = process.argv.includes('--detalhe')
 const outros = [...dados.clientes.values()].map((c) => ({ id: c.id, nome: normalizar(c.nome) }))
 

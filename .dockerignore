@@ -10,3 +10,4 @@ caqui-invest
 scripts/pdf
 *.md
 !README.md
+data

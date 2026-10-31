@@ -7,7 +7,7 @@ const bool = z
   .transform((v) => v === 'true' || v === '1')
 
 const schema = z.object({
-  DADOS_DIR: z.string().default('./caqui-invest/dados'),
+  DADOS_DIR: z.string().default('./data'),
   LLM_PROVIDER: z.enum(['template', 'anthropic', 'openai']).default('template'),
   LLM_API_KEY: z.string().default(''),
   LLM_MODEL: z.string().default(''),

@@ -17,7 +17,7 @@ services:
       - /app/.nuxt          # arquivos gerados do container, separados dos do host
       - /app/.output
       - ./caqui-invest:/app/caqui-invest:ro   # a pasta do case nunca é gravável
-      - ./caqui-invest/dados:/dados:ro
+      - ./data:/dados:ro
     environment:
       # Sem isso o inotify às vezes não enxerga mudanças em volumes de alguns hosts (Docker Desktop, WSL).
       CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-false}

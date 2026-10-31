@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { carregarDados } from './dados'
 import { parseCsv } from './csv'
 
-const dados = carregarDados(resolve('caqui-invest/dados'))
+const dados = carregarDados(resolve('data'))
 
 describe('parseCsv', () => {
   it('lê campos entre aspas com vírgula e aspas escapadas', () => {

@@ -19,7 +19,7 @@ describe('loadEnv', () => {
     expect(env.LLM_PROVIDER).toBe('template')
     expect(env.UNDERSTANDING_LLM).toBe(false)
     expect(env.ATENDENTE_PIN).toBe('')
-    expect(env.dadosDir.endsWith('caqui-invest/dados')).toBe(true)
+    expect(env.dadosDir.endsWith('/data')).toBe(true)
   })
 
   it('exige chave quando o provedor não é template', () => {

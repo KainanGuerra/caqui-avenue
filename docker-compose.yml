@@ -17,8 +17,8 @@ services:
       UNDERSTANDING_LLM: ${UNDERSTANDING_LLM:-false}
       ATENDENTE_PIN: ${ATENDENTE_PIN:-}
     volumes:
-      # Pacote de dados do case, somente leitura: o container nunca altera o caqui-invest/.
-      - ./caqui-invest/dados:/dados:ro
+      # Dados fictícios do case (cópia em ./data), somente leitura: o container nunca altera os dados.
+      - ./data:/dados:ro
     read_only: true
     tmpfs:
       - /tmp

@@ -4,7 +4,7 @@
 
 > **`caqui-invest/` é só de consulta** (case, dados, templates, checador): não se altera. Todo o trabalho vive na raiz de `avenue/`.
 
-Repositório do grupo para o Hands On com IA (31/10/2026), case **Caqui Invest**: atendimento que escala com confiança. O problema e as regras estão em `caqui-invest/CASE.md`; os dados sintéticos em `caqui-invest/dados/` (agora é 18/11/2026, 10h BRT); o checador em `caqui-invest/ferramentas/checar_respostas.py`. A solução é a **Kaki**: agente de atendimento em que o código decide e o LLM só redige, com duas visões (cliente e suporte). Está construída; a spec está em `SPEC.md`. Stack: Nuxt 4, TypeScript, Vitest, Zod; sem banco; só local (D6).
+Repositório do grupo para o Hands On com IA (31/10/2026), case **Caqui Invest**: atendimento que escala com confiança. O problema e as regras estão em `caqui-invest/CASE.md`; os dados sintéticos em `data/` (cópia de `caqui-invest/dados/`, D14; agora é 18/11/2026, 10h BRT); o checador em `caqui-invest/ferramentas/checar_respostas.py`. A solução é a **Kaki**: agente de atendimento em que o código decide e o LLM só redige, com duas visões (cliente e suporte). Está construída; a spec está em `SPEC.md`. Stack: Nuxt 4, TypeScript, Vitest, Zod; sem banco; só local (D6).
 
 **O objetivo é código que eu consiga explicar e defender.** Prefira a opção simples e legível e diga o porquê em `DECISIONS.md`. Eu decido a arquitetura e dirijo por prompts; a IA desenvolve, testa e verifica as regras. Explique o que mudar.
 

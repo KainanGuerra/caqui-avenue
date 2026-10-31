@@ -2,7 +2,7 @@
 
 Especificação do comportamento esperado, escrita **antes do código**, em Gherkin pt-BR (`# language: pt`). É o contrato que a SPEC, os testes e os diagramas compartilham. Ainda não há runner: cada cenário foi escrito para virar teste sem reescrita.
 
-A fonte das regras é `../../caqui-invest/CASE.md` (pasta só de consulta) e os valores esperados vêm de `../../caqui-invest/dados/perguntas_teste.jsonl`, de `taxas.json` e de `calendario.json`. Nenhuma data ou alíquota é inventada: os cenários derivados do calendário dizem isso no cabeçalho do exemplo.
+A fonte das regras é `../../caqui-invest/CASE.md` (pasta só de consulta) e os valores esperados vêm de `../../data/perguntas_teste.jsonl`, de `taxas.json` e de `calendario.json`. Nenhuma data ou alíquota é inventada: os cenários derivados do calendário dizem isso no cabeçalho do exemplo.
 
 ## Convenções
 

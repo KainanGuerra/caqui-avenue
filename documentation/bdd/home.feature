@@ -66,7 +66,7 @@ Funcionalidade: Home do cliente
     Quando a Home pede a conta
     Então os avisos são <avisos>
 
-    # Derivado de caqui-invest/dados/calendario.json: 15/11/2026 é domingo e 20/11/2026 é sexta.
+    # Derivado de data/calendario.json: 15/11/2026 é domingo e 20/11/2026 é sexta.
     Exemplos:
       | hoje       | avisos                                                                                                              |
       | 18/11/2026 | "20/11 é feriado (Dia da Consciência Negra)": "Pedidos de quinta, 19/11, depois das 16h00 contam a partir de segunda, 23/11." |
