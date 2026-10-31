@@ -25,6 +25,9 @@ describe('golpe (regra 5)', () => {
     'CODIGO DO SMS??? o gerente disse que e normal',
     'quanto rende o CDB? ah, um rapaz pediu meu codigo',
     'já passei o código e fiz um Pix pra eles',
+    'fui vítima de golpe, o que eu faço?',
+    'acho que estou sofrendo um golpe',
+    'Preciso falar com a segurança agora',
   ])('detecta golpe em "%s"', (texto) => {
     expect(tem(sinais(texto), 'golpe')).toBe(true)
   })
@@ -34,6 +37,8 @@ describe('golpe (regra 5)', () => {
     'qual o prazo do resgate do CDB?',
     'onde vejo meu informe de rendimentos?',
     'quero falar com uma pessoa',
+    'Como sei se uma ligação ou mensagem é golpe?',
+    'o que fazer se eu cair num golpe?',
   ])('não confunde "%s" com golpe', (texto) => {
     expect(tem(sinais(texto), 'golpe')).toBe(false)
   })

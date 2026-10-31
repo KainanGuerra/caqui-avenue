@@ -8,6 +8,11 @@ export function humanoDisponivel(m: Momento): boolean {
   return m.minutos >= ABERTURA && m.minutos < FECHAMENTO
 }
 
+const horaCheia = (minutos: number) => `${Math.floor(minutos / 60)}h${minutos % 60 ? String(minutos % 60).padStart(2, '0') : ''}`
+
+/** "das 8h às 20h": sai das mesmas constantes que decidem se há pessoa agora. */
+export const descreverHorario = (): string => `das ${horaCheia(ABERTURA)} às ${horaCheia(FECHAMENTO)}`
+
 export function descreverRetorno(m: Momento): string {
   const hoje = m.minutos < ABERTURA
   return `${hoje ? 'hoje' : 'amanhã'} a partir das 8h`

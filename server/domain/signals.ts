@@ -29,6 +29,8 @@ const GOLPE: Regra[] = [
   todos('GOLPE_PIX_BLOQUEIO', /\b(pix|transferencia|deposito)\b/, /\b(nao bloquear|desbloquear|liberar minha conta|evitar bloqueio)\b/),
   re('GOLPE_INSTALAR_APP', /\b(instalar|baixar|instale|baixe)\b.*\b(aplicativo|app|programa)\b.*\b(suporte|acessar|controlar|atendente|gerente)\b|\b(suporte|gerente|atendente)\b.*\b(acessar|controlar)\b.*\b(celular|computador|aparelho)\b/),
   re('GOLPE_ACESSO_REMOTO', /\b(suporte remoto|acesso remoto|anydesk|teamviewer|controlar (o )?(meu )?(celular|computador))\b/),
+  // Relato em primeira pessoa ou pedido da segurança. Pergunta hipotética ("como sei se é golpe?") segue informativa.
+  re('GOLPE_RELATO', /\b(acho que|sofrendo|sofri|fui vitima|vitima de|cai (em|num|no)|caindo (em|num|no)|estou (num|em um)|tentaram|tentando)\b.{0,25}\bgolpe\b|\bfalar com a seguranca\b/),
   todos('GOLPE_LINK', /\b(link|cliquei|clicar|clique)\b/, /\b(atualizar|confirmar|validar|regularizar)\b.*\b(dados|cadastro|conta)\b/, /\b(pediram|pede|pedindo|pediu|senha|codigo)\b/),
 ]
 

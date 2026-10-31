@@ -11,8 +11,8 @@ Regras do agente: `.cursor/rules/design-system.mdc`. Tokens: `app/assets/css/mai
 | Tela no Figma | Nó | Arquivo | Estado hoje |
 | --- | --- | --- | --- |
 | Home · Mobile 390 | [50:3](https://www.figma.com/design/tl9FFynv0PPlTdnLkGVPPb/Caqui?node-id=50-3) | `app/pages/inicio.vue` | feita (D12): em andamento, visão geral, avisos, ações, alocação, próximos passos |
-| Atendimento · 14h | [51:169](https://www.figma.com/design/tl9FFynv0PPlTdnLkGVPPb/Caqui?node-id=51-169) | `app/pages/conversa.vue` (topo) | chat direto, sem tela de entrada |
-| Atendimento · 23h | [51:332](https://www.figma.com/design/tl9FFynv0PPlTdnLkGVPPb/Caqui?node-id=51-332) | idem, com `humanoDisponivel = false` | badge "Pessoa volta às 8h" |
+| Atendimento · 14h | [51:169](https://www.figma.com/design/tl9FFynv0PPlTdnLkGVPPb/Caqui?node-id=51-169) | `app/pages/atendimento.vue` | feita (D13): estado "uma pessoa pode te atender agora" |
+| Atendimento · 23h | [51:332](https://www.figma.com/design/tl9FFynv0PPlTdnLkGVPPb/Caqui?node-id=51-332) | `app/pages/atendimento.vue`, com `humanoDisponivel = false` | feita (D13): "Atendimento volta {retorno}" e "Registrar minha demanda" |
 | Chat 1 · Fonte e status | [54:413](https://www.figma.com/design/tl9FFynv0PPlTdnLkGVPPb/Caqui?node-id=54-413) | `conversa.vue`, `ChatMensagem.vue` | fontes como badge azul |
 | Chat 2 · Golpe | [54:490](https://www.figma.com/design/tl9FFynv0PPlTdnLkGVPPb/Caqui?node-id=54-490) | `ChatMensagem.vue` (`acao = seguranca_imediata`) | balão vermelho claro |
 | Chat 3 · Não inventa / não recomenda | [54:522](https://www.figma.com/design/tl9FFynv0PPlTdnLkGVPPb/Caqui?node-id=54-522) | `ChatMensagem.vue` | igual às outras respostas |
@@ -36,13 +36,24 @@ Ordem de cima para baixo; tudo vem pronto de `conta` (`GET /api/chat/:sessaoId/c
 2. **Em andamento** (`EmAndamentoCard.vue`, fundo `bg-marfim-300`, layer 50:19, oculto no frame mas parte da tela): um card por item de `conta.emAndamento` (status `em_processamento`). Badge "Em processamento", "Seu resgate de {valor} cai hoje, {dd/mm}", etapas com estado feito/atual/próximo, fonte `KB-006 · {OP}` e "Ver detalhes do resgate" (abre a conversa com "Quando cai meu resgate?"). Sem a frase "não sumiu" (PT-03) e sem prometer aviso. Sem operação em andamento, o card não aparece.
 3. **Visão geral** (`ResumoPatrimonio.vue`): `patrimonioCentavos`, "Ocultar valores" (estado só de tela, esconde todo valor da Home), "Atualizado em", Investido / Saldo disponível / Resultado desde a aplicação, e a nota de valores brutos com fonte. Sem seletor de período.
 4. **Avisos** (`UAlert` warning) de `conta.avisos`; o alerta de protocolo aberto fica junto.
-5. **O que você quer fazer?** (`AcaoRapida.vue`) 2 colunas: "Resgatar" (abre a conversa com "Quando cai meu resgate?") e "Falar com uma pessoa". Investir e Transferir ficam de fora: não existem neste corte.
+5. **O que você quer fazer?** (`AcaoRapida.vue`) 2 colunas: "Resgatar" (abre a conversa com "Quando cai meu resgate?") e "Falar com uma pessoa" (abre `/atendimento`). Investir e Transferir ficam de fora: não existem neste corte.
 6. **Alocação** (`AlocacaoBarra.vue`): barra empilhada e legenda com nome, % e valor de `conta.alocacao`.
 7. **Próximos passos:** card educativo com o selo "Conteúdo educativo, não é recomendação" e o card de atendimento humano com a disponibilidade real.
 
 `PosicaoCard` e `OperacaoLinha` saíram da Home; os componentes continuam no repositório.
 
-### Conversa (`conversa.vue`, `ChatMensagem.vue`), nós 51:169 a 54:593
+### Atendimento (`atendimento.vue`), nós 51:169 e 51:332 (feito, D13)
+Uma página, dois estados; tudo vem de `GET /api/chat/:sessaoId/atendimento`, com o estado pelo relógio do servidor. Os botões enviam frases de `app/utils/pedidos.ts` pela mesma `useChat()`.
+1. **Título:** "Atendimento" + "Pergunte à Kaki ou fale com uma pessoa. Você não precisa repetir o que já contou."
+2. **Pergunte à Kaki:** campo com rótulo visível "Sua dúvida" (o Figma não tem; a regra de acessibilidade pede) e as três primeiras sugestões do chat. Ambos abrem a conversa com a pergunta.
+3. **Segurança 24h, sem fila** (`bg-error/10`): "Falar com a segurança agora" abre a conversa com o relato de golpe (`seguranca_imediata`). Sem "Bloquear meu acesso".
+4. **Falar com uma pessoa:** ponto verde e "Uma pessoa pode te atender agora", ou ponto cinza e "Atendimento volta {retorno}" com "Registrar minha demanda". O protocolo só aparece depois do registro, vindo da resposta. Sem espera estimada. Linha "Quer saber onde investir?" com a fonte da busca (KB-029).
+5. **Minhas conversas:** só com casos; `UBadge` "Respondido" (success) ou "Em andamento" (neutral). Sem "Ver todas": não há tela de conversas antigas.
+6. **Perguntas frequentes:** lista do servidor com "Fonte: {kbId}"; o toque abre a conversa com a pergunta.
+
+Fora do corte: "Fazer uma reclamação", "Encerrar minha conta" e a barra inferior de 5 abas. Ícones do Figma são os Lucide equivalentes (`sparkles`, `send`, `shield-alert`, `calendar`, `chevron-right`, `circle-check`, `info`).
+
+### Conversa (`conversa.vue`, `ChatMensagem.vue`), nós 54:413 a 54:593
 - **Cabeçalho:** "Atendimento Caqui", protocolo quando houver, e botão "Falar com uma pessoa" sempre visível no topo (sai do rodapé).
 - **Autor identificado:** "Kaki · assistente com IA" (ícone `i-lucide-sparkles`), "{nome} · pessoa da Caqui", cliente à direita em `bg-primary text-inverted`.
 - **Fonte:** `FonteChip` neutro com borda: "Fonte: KB-006". Sai o badge azul.
@@ -79,7 +90,7 @@ Se não der tempo, a tela mostra só o que já vem da API e o card correspondent
 - [ ] Nenhum `slate-`, `emerald-`, `orange-` ou hex em `app/components` e `app/pages` (`grep -rnE "slate-|emerald-|orange-|#[0-9a-fA-F]{6}" app/components app/pages` vazio).
 - [ ] Títulos em Manrope, resto em Inter.
 - [ ] Contraste: nenhum texto em `text-dimmed` com informação; limite de campo visível.
-- [ ] "Falar com uma pessoa" visível em `/inicio` e `/conversa`.
+- [ ] "Falar com uma pessoa" visível em `/inicio`, `/conversa` e `/atendimento`.
 - [ ] Golpe toma a mensagem com `role="alert"`.
 - [ ] Toda resposta factual da Kaki com `FonteChip`.
 - [ ] Teclado: tab por todas as ações com foco visível.

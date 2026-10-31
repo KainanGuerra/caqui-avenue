@@ -91,4 +91,18 @@ export type ContaVista = {
   avisos: Aviso[]
 }
 
+// Página de Atendimento do cliente. Espelha server/domain/support-view.ts.
+export type PerguntaComFonte = { pergunta: string; kbId: string | null }
+
+export type CasoVista = { protocolo: string; motivo: string; criadoEm: string; status: 'respondido' | 'em_andamento' }
+
+export type AtendimentoVista = {
+  humanoDisponivel: boolean
+  horario: string
+  retorno: string | null
+  faq: PerguntaComFonte[]
+  especialista: PerguntaComFonte
+  casos: CasoVista[]
+}
+
 export type ResumoFila = { emAberto: number; golpe: number; prioridade: number; assumidos: number; resolvidos: number }

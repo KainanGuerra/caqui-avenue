@@ -8,7 +8,7 @@ A fonte das regras é `../../caqui-invest/CASE.md` (pasta só de consulta) e os 
 
 - **Etiquetas:** `@regra-N` liga o cenário à regra do case; `@PT-xx` liga à pergunta de teste de mesmo id; `@transversal` marca o que vale para todas as regras (sessão, política, entrega, redação); `@premissa` marca o que depende de uma decisão ainda aberta e precisa ser confirmado na SPEC antes de virar teste.
 - **Ações** seguem o vocabulário do case: `responder`, `encaminhar_humano`, `encaminhar_especialista`, `seguranca_imediata`, `protocolo`, `recusar`.
-- **Relógio e cliente** ficam no `Contexto` ou no `Dado` ("agora é 18/11/2026 às 10h", "o cliente da sessão é C-0001"). Não há passos de tela, salvo em `home.feature`, que descreve a Home: lá os passos de tela só exibem o que o servidor devolveu.
+- **Relógio e cliente** ficam no `Contexto` ou no `Dado` ("agora é 18/11/2026 às 10h", "o cliente da sessão é C-0001"). Não há passos de tela, salvo em `home.feature` e `atendimento.feature`, que descrevem páginas do cliente: lá os passos de tela só exibem o que o servidor devolveu ou enviam a intenção à conversa.
 - **Falas do cliente** ficam literais, entre aspas, em português.
 - Além dos cenários espelhados nas 40 perguntas, cada regra tem **variações adversariais** (paráfrase, caixa alta, acento faltando, insistência).
 
@@ -17,6 +17,7 @@ A fonte das regras é `../../caqui-invest/CASE.md` (pasta só de consulta) e os 
 | Arquivo | Funcionalidade | Regras | Perguntas de teste | Cenários |
 |---|---|---|---|---:|
 | [`acesso-e-papeis.feature`](acesso-e-papeis.feature) | Acesso simulado e papéis | transversal | sem PT (variações e regras transversais) | 8 |
+| [`atendimento.feature`](atendimento.feature) | Página de Atendimento do cliente | 4, 5, 9, 10, 12 | sem PT (variações e regras transversais) | 12 |
 | [`cliente-vulneravel.feature`](cliente-vulneravel.feature) | Cliente vulnerável tem prioridade humana | 6 | PT-22, PT-23, PT-24 | 6 |
 | [`comparacao-poupanca.feature`](comparacao-poupanca.feature) | Comparação de rendimento com a poupança | 3 | PT-10, PT-11, PT-12 | 5 |
 | [`dados-pessoais.feature`](dados-pessoais.feature) | Dados pessoais protegidos | 10 | PT-32, PT-33 | 6 |

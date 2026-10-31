@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { em } from '../testing/fixtures'
-import { descreverRetorno, humanoDisponivel } from './business-hours'
+import { descreverHorario, descreverRetorno, humanoDisponivel } from './business-hours'
 
 describe('horário do atendimento humano (regra 12)', () => {
   it.each([
@@ -19,5 +19,9 @@ describe('horário do atendimento humano (regra 12)', () => {
   it('fora do horário o retorno é a partir das 8h', () => {
     expect(descreverRetorno(em('2026-11-18T23:00-03:00'))).toBe('amanhã a partir das 8h')
     expect(descreverRetorno(em('2026-11-18T03:00-03:00'))).toBe('hoje a partir das 8h')
+  })
+
+  it('o horário escrito na tela é o mesmo que decide a disponibilidade', () => {
+    expect(descreverHorario()).toBe('das 8h às 20h')
   })
 })

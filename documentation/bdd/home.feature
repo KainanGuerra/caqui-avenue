@@ -93,6 +93,8 @@ Funcionalidade: Home do cliente
     E não há "Investir" nem "Transferir"
     Quando a pessoa toca em "Resgatar"
     Então a conversa abre e envia "Quando cai meu resgate?"
+    Quando a pessoa toca em "Falar com uma pessoa"
+    Então abre a página de Atendimento, que decide entre falar agora e registrar a demanda
 
   @regra-4
   Cenário: Conteúdo educativo não é recomendação
@@ -105,6 +107,7 @@ Funcionalidade: Home do cliente
     Dado que agora é 18/11/2026 às <hora>
     Quando a pessoa vê "Próximos passos"
     Então o card "Falar com uma pessoa" diz <texto>
+    E tocar nele abre a página de Atendimento
 
     Exemplos:
       | hora  | texto                                                          |

@@ -6,6 +6,7 @@ export type ItemMenu = { chave: string; rotulo: string; icone: string; para: str
 export const ITENS_MENU: ItemMenu[] = [
   { chave: 'inicio', rotulo: 'Início', icone: 'i-lucide-layout-dashboard', para: '/inicio', papeis: ['cliente'] },
   { chave: 'conversa', rotulo: 'Conversar com a Kaki', icone: 'i-lucide-message-circle', para: '/conversa', papeis: ['cliente'] },
+  { chave: 'atendimento', rotulo: 'Atendimento', icone: 'i-lucide-life-buoy', para: '/atendimento', papeis: ['cliente'] },
   { chave: 'suporte', rotulo: 'Fila de atendimento', icone: 'i-lucide-headset', para: '/suporte', papeis: ['suporte'] },
 ]
 

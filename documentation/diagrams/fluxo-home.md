@@ -20,7 +20,7 @@ flowchart TD
     L --> M["Tela exibe na ordem:<br/>saudação, em andamento, visão geral,<br/>avisos, ações, alocação, próximos passos"]
     M --> N{"O que a pessoa toca?"}
     N -->|"Resgatar ou<br/>Ver detalhes do resgate"| O["Conversa envia<br/>Quando cai meu resgate?"]
-    N -->|"Falar com uma pessoa"| P["Conversa envia o pedido<br/>e a entrega ao humano segue"]
+    N -->|"Falar com uma pessoa"| P["Abre a página de Atendimento<br/>ver fluxo-atendimento"]
     N -->|"Ocultar valores"| Q["Só a tela muda<br/>nada vai ao servidor"]
 ```
 

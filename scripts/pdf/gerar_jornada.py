@@ -167,6 +167,7 @@ DIAGRAMA_DE = {
     'painel-do-atendente.feature': 'fluxo-atendente',
     'redacao-e-validacao.feature': 'sequencia-pergunta-de-prazo',
     'home.feature': 'fluxo-home',
+    'atendimento.feature': 'fluxo-atendimento',
 }
 
 
@@ -321,6 +322,9 @@ def build(images):
     s += pagina('Home do cliente', 'O que est\u00e1 em andamento, sem a tela calcular nada',
                 'O servidor monta patrim\u00f4nio, etapas, aloca\u00e7\u00e3o e avisos; a tela s\u00f3 exibe.', 'fluxo-home', 360,
                 ['As etapas usam o corte das 16h e os dias \u00fateis, com fonte KB-006 e o id da opera\u00e7\u00e3o.', 'Feriado nos pr\u00f3ximos 5 dias \u00fateis vira aviso; feriado no fim de semana n\u00e3o.', 'Resgatar abre a conversa com "Quando cai meu resgate?".'], lado=True)
+    s += pagina('Atendimento do cliente', 'Uma p\u00e1gina, dois estados, pelo rel\u00f3gio do servidor',
+                'A tela s\u00f3 exibe e envia a inten\u00e7\u00e3o; o pipeline decide a a\u00e7\u00e3o.', 'fluxo-atendimento', 360,
+                ['Das 8h \u00e0s 20h h\u00e1 pessoa agora; fora disso, "Registrar minha demanda" e o protocolo s\u00f3 depois do registro.', 'Seguran\u00e7a 24h, sem fila: o bot\u00e3o envia o relato de golpe e vira seguran\u00e7a imediata.', 'Perguntas frequentes mostram a fonte da base atual (KB-006, nunca a KB-007).'], lado=True)
     s += pagina('Liquidação passo a passo', 'Como a data de pagamento \u00e9 calculada',
                 'Para a sala validar a conta.', 'fluxo-liquidacao', 290,
                 ['Corte das 16h; fim de semana e feriado v\u00e3o para o pr\u00f3ximo dia \u00fatil.', 'Exemplo do case: sexta 30/10 \u00e0s 17h, feriado na segunda: pagamento do fundo em 05/11.', 'A data \u00e9 sempre calculada, nunca lida da planilha.'])

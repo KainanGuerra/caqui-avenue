@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { casaDoPapel, destinoPermitido, itemAtivo, menuDoPapel } from './navegacao'
 
 describe('menu por papel', () => {
-  it('cliente vê início e conversa; suporte vê só a fila', () => {
-    expect(menuDoPapel('cliente').map((i) => i.chave)).toEqual(['inicio', 'conversa'])
+  it('cliente vê início, conversa e atendimento; suporte vê só a fila', () => {
+    expect(menuDoPapel('cliente').map((i) => i.chave)).toEqual(['inicio', 'conversa', 'atendimento'])
     expect(menuDoPapel('suporte').map((i) => i.chave)).toEqual(['suporte'])
   })
 
@@ -30,10 +30,13 @@ describe('quem abre o quê', () => {
     expect(destinoPermitido('cliente', '/suporte')).toBe(casaDoPapel('cliente'))
     expect(destinoPermitido('suporte', '/conversa')).toBe('/suporte')
     expect(destinoPermitido('suporte', '/inicio')).toBe('/suporte')
+    expect(destinoPermitido('suporte', '/atendimento')).toBe('/suporte')
+    expect(destinoPermitido(null, '/atendimento')).toBe('/')
   })
 
   it('cada papel abre as próprias telas', () => {
     expect(destinoPermitido('cliente', '/conversa')).toBeNull()
+    expect(destinoPermitido('cliente', '/atendimento')).toBeNull()
     expect(destinoPermitido('suporte', '/suporte')).toBeNull()
   })
 })

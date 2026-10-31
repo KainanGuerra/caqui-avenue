@@ -1,6 +1,6 @@
 import type { CasoResumo, ContaVista, Mensagem } from '~/types'
 
-type Saida = { texto: string; comHumano: boolean }
+type Saida = { texto: string; comHumano: boolean; acao: string; protocolo: string | null }
 
 // O polling é um só para o app todo (início e conversa compartilham o estado), por isso fora da função.
 let timer: ReturnType<typeof setInterval> | undefined
@@ -79,16 +79,18 @@ export function useChat() {
     acompanhar()
   }
 
-  async function enviar(texto: string) {
+  // Devolve a resposta do servidor (com o protocolo, quando abriu caso) para quem enviou de fora da conversa; null se não enviou.
+  async function enviar(texto: string): Promise<Saida | null> {
     const t = texto.trim()
-    if (!t || !acesso.sessaoId.value || enviando.value) return
+    if (!t || !acesso.sessaoId.value || enviando.value) return null
     enviando.value = true
     erro.value = ''
     mensagens.value = [...mensagens.value, { papel: 'cliente', texto: t, em: '' }]
     try {
-      await $fetch<Saida>('/api/chat', { method: 'POST', body: { sessaoId: acesso.sessaoId.value, texto: t, momento: momento() } })
+      return await $fetch<Saida>('/api/chat', { method: 'POST', body: { sessaoId: acesso.sessaoId.value, texto: t, momento: momento() } })
     } catch {
       erro.value = 'Não consegui enviar agora. Tente de novo em instantes.'
+      return null
     } finally {
       await atualizar()
       await carregarSugestoes()

@@ -30,6 +30,7 @@ const ROTULO: Record<string, string> = {
   GOLPE_CREDENCIAL: 'pedido de senha, código ou token', GOLPE_CREDENCIAL_PASSADA: 'cliente já passou código ou senha',
   GOLPE_PIX_TESTE: 'Pix de teste ou conta segura', GOLPE_PIX_BLOQUEIO: 'Pix para evitar bloqueio', GOLPE_INSTALAR_APP: 'pedido para instalar aplicativo',
   GOLPE_ACESSO_REMOTO: 'acesso remoto ao aparelho', GOLPE_LINK: 'link para atualizar dados', GOLPE_SESSAO: 'sessão em modo segurança',
+  GOLPE_RELATO: 'cliente relatou suspeita de golpe',
   VULNERAVEL_TERCEIRO: 'terceiro pressionando', VULNERAVEL_PRESSAO: 'pressão para resgatar', VULNERAVEL_CONFUSAO: 'sinal de confusão',
   VULNERAVEL_RESGATE_ATIPICO: 'resgate total atípico', VULNERAVEL_SESSAO: 'vulnerabilidade já detectada nesta conversa',
   DADO_ALHEIO_ID: 'pedido de dado de outro cliente', DADO_ALHEIO_NOME: 'pedido de dado de outra pessoa', DADO_ALHEIO_LISTA: 'pedido de lista de clientes',
