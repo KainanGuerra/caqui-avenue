@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { casaDoPapel, destinoPermitido, ITENS_MENU, itemAtivo, menuDoPapel } from './navegacao'
 
 describe('menu por papel', () => {
-  it('cliente vê as cinco abas do rodapé, na ordem do Figma; suporte vê só a fila', () => {
+  it('cliente vê as cinco abas do rodapé, na ordem do Figma; suporte vê só a fila; gerente vê só o painel', () => {
     expect(menuDoPapel('cliente').map((i) => i.rotulo)).toEqual(['Início', 'Carteira', 'Investir', 'Aprender', 'Atendimento'])
     expect(menuDoPapel('suporte').map((i) => i.chave)).toEqual(['suporte'])
+    expect(menuDoPapel('gerente').map((i) => i.chave)).toEqual(['gerente'])
   })
 
   it('a conversa não tem aba própria: é a última alternativa, dentro do Atendimento', () => {
@@ -32,6 +33,16 @@ describe('quem abre o quê', () => {
   it('quem já entrou vai direto para a própria casa ao abrir a entrada', () => {
     expect(destinoPermitido('cliente', '/')).toBe('/inicio')
     expect(destinoPermitido('suporte', '/')).toBe('/suporte')
+    expect(destinoPermitido('gerente', '/')).toBe('/gerente')
+  })
+
+  it('gerente não abre a fila nem o chat; cliente e suporte não abrem o painel', () => {
+    expect(destinoPermitido('gerente', '/suporte')).toBe('/gerente')
+    expect(destinoPermitido('gerente', '/conversa')).toBe('/gerente')
+    expect(destinoPermitido('cliente', '/gerente')).toBe('/inicio')
+    expect(destinoPermitido('suporte', '/gerente')).toBe('/suporte')
+    expect(destinoPermitido(null, '/gerente')).toBe('/')
+    expect(destinoPermitido('gerente', '/gerente')).toBeNull()
   })
 
   it('cliente não abre a fila e o suporte não abre nenhuma tela do cliente, nem a conversa fora do menu', () => {

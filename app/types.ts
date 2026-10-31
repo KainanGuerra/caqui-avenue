@@ -139,3 +139,24 @@ export type InvestirVista = { produtos: ProdutoVista[]; artigos: ArtigoLeitura[]
 export type TemaAprender = { titulo: string; artigos: ArtigoLeitura[] }
 
 export type ResumoFila = { emAberto: number; golpe: number; prioridade: number; assumidos: number; resolvidos: number }
+
+// Painel do gerente (GET /api/gerente/painel): a Kaki desde que o servidor subiu. Percentual null = sem base para calcular.
+export type Contagem = { chave: string; rotulo: string; total: number; pct: number }
+
+export type StatusCaso = 'aberto' | 'assumido' | 'resolvido'
+export type CasoEscalonado = { protocolo: string; clienteNome: string; acao: string; motivos: string[]; status: StatusCaso; prioridade: 0 | 1 | 2; criadoEm: string }
+
+export type PainelGerente = {
+  redacao: 'template' | 'anthropic' | 'openai'
+  conversas: number
+  mensagens: number
+  resolucaoAutomaticaPct: number | null
+  escalonadas: number
+  escalonadasPct: number | null
+  travadas: number
+  porAcao: Contagem[]
+  casos: { itens: CasoEscalonado[]; total: number; pagina: number; paginas: number }
+  qualidade: { redacoesLlm: number; reprovadasPct: number | null; comFontePct: number | null; naoEntendeuPct: number | null }
+  latencia: { mediaMs: number | null }
+  custo: { chamadasLlm: number; tokensEntrada: number; tokensSaida: number; totalCentavos: number; porMilConversasCentavos: number | null; precoConfigurado: boolean }
+}

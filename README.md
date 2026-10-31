@@ -1,9 +1,10 @@
 # Kaki: atendimento da Caqui Invest
 
-Agente de atendimento para o Hands On com IA (31/10/2026): **o código decide, o LLM só redige.** Duas visões ligadas pelo mesmo caso: o chat do cliente e o painel do suporte. Tudo é fictício. Os dados do case estão em `data/` (cópia de `caqui-invest/dados`, D18); o case e o checador continuam em `caqui-invest/` (só consulta).
+Agente de atendimento para o Hands On com IA (31/10/2026): **o código decide, o LLM só redige.** Duas visões ligadas pelo mesmo caso, o chat do cliente e o painel do suporte, e um painel do gerente para acompanhar a operação. Tudo é fictício. Os dados do case estão em `data/` (cópia de `caqui-invest/dados`, D18); o case e o checador continuam em `caqui-invest/` (só consulta).
 
 - **Visão do cliente** (`/`): escolhe um cliente simulado e conversa com a Kaki. Fonte em cada resposta factual, pessoa oferecida quando a Kaki não resolve (e numa linha discreta do Atendimento), protocolo à vista, letra grande, simulador de horário.
-- **Visão do suporte** (`/atendente`): fila ordenada (golpe, 60 anos ou mais, demais), motivos da decisão, resumo, fontes, conversa; assumir, responder e resolver. A resposta aparece no chat do cliente.
+- **Visão do suporte** (`/suporte`): fila ordenada (golpe, 60 anos ou mais, demais), motivos da decisão, resumo, fontes, conversa; assumir, responder e resolver. A resposta aparece no chat do cliente.
+- **Visão do gerente** (`/gerente`): volume de atendimentos, resolução automática, conversas escalonadas, qualidade das respostas, custo estimado e latência da Kaki ao vivo, com a lista de casos paginada (D19).
 
 Spec: [SPEC.md](SPEC.md) · Decisões: [DECISIONS.md](DECISIONS.md) · BDD: [documentation/bdd](documentation/bdd/README.md) · Jornada: [documentation/JORNADA_DO_USUARIO.pdf](documentation/JORNADA_DO_USUARIO.pdf)
 
@@ -17,7 +18,7 @@ cp .env.example .env     # opcional: os padrões funcionam sem LLM
 corepack pnpm dev        # http://localhost:3000
 ```
 
-Sem LLM, as respostas vêm dos templates (modo `template`). Para usar um modelo, defina `LLM_PROVIDER` (`anthropic` ou `openai`, esta compatível com qualquer servidor de chat completions), `LLM_API_KEY` e `LLM_MODEL`; `UNDERSTANDING_LLM=true` liga o entendimento com LLM, que só pode subir alertas. A chave nunca vai para o repositório (`.env` é ignorado). Defina `ATENDENTE_PIN` para proteger o painel.
+Sem LLM, as respostas vêm dos templates (modo `template`). Para usar um modelo, defina `LLM_PROVIDER` (`anthropic` ou `openai`, esta compatível com qualquer servidor de chat completions), `LLM_API_KEY` e `LLM_MODEL`; `UNDERSTANDING_LLM=true` liga o entendimento com LLM, que só pode subir alertas. A chave nunca vai para o repositório (`.env` é ignorado). Defina `ATENDENTE_PIN` para proteger o painel do suporte e `GERENTE_PIN` para o do gerente. Para o painel do gerente estimar custo com LLM, defina `LLM_PRECO_ENTRADA_BRL_MTOK` e `LLM_PRECO_SAIDA_BRL_MTOK` (reais por milhão de tokens).
 
 ## Rodar com Docker Compose
 
@@ -25,7 +26,7 @@ Sem LLM, as respostas vêm dos templates (modo `template`). Para usar um modelo,
 docker compose up --build        # http://localhost:3000
 ```
 
-Sem `.env` o agente sobe no modo template e com o painel de suporte aberto. As variáveis do `.env.example` (`LLM_*`, `ATENDENTE_PIN`, `RELOGIO`, `PORT`) são lidas pelo compose. Os dados do case entram como volume somente leitura (`./data`), nunca dentro da imagem; o container roda como usuário não root, com o sistema de arquivos em modo leitura e `healthcheck` em `/api/saude`. Parar: `docker compose down`.
+Sem `.env` o agente sobe no modo template e com o painel de suporte aberto. As variáveis do `.env.example` (`LLM_*`, `ATENDENTE_PIN`, `GERENTE_PIN`, `RELOGIO`, `PORT`) são lidas pelo compose. Os dados do case entram como volume somente leitura (`./data`), nunca dentro da imagem; o container roda como usuário não root, com o sistema de arquivos em modo leitura e `healthcheck` em `/api/saude`. Parar: `docker compose down`.
 
 ### Com hot reload
 
@@ -59,7 +60,7 @@ scripts/                perguntas de teste, avaliação de sinais, geração do 
 
 ## Limites
 
-Sem URL pública (D6), sessões e fila em memória, atendente humano simulado, entendimento com LLM não exercitado com provedor real. A espera estimada é simulada.
+Sem URL pública (D6), sessões, fila e métricas do painel do gerente em memória (zeram ao reiniciar), custo do LLM estimado pelo tamanho do texto, atendente humano simulado, entendimento com LLM não exercitado com provedor real. A espera estimada é simulada.
 
 ## Como usamos IA
 

@@ -21,6 +21,11 @@ Funcionalidade: Acesso simulado e papéis
     Então o servidor cria a sessão com o papel de atendente
     E a tela mostra a fila de casos
 
+  Cenário: Gerente entra no painel
+    Quando alguém escolhe "Sou gerente" (Helena)
+    Então a tela mostra o painel gerencial
+    E o menu não tem a fila nem o chat
+
   Cenário: Cliente não acessa a fila
     Dado a sessão do cliente C-0001
     Quando ele pede a fila de casos

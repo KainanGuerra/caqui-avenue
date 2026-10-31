@@ -42,13 +42,16 @@ export function useAcesso() {
     guardar()
   }
 
-  function entrarComoSuporte(nome: string) {
-    papel.value = 'suporte'
-    atendente.value = nome.trim() || 'Atendente'
+  // Suporte e gerente são da equipe: guardam só o nome (em `atendente`), sem sessão de cliente.
+  function entrarComoEquipe(quem: 'suporte' | 'gerente', nome: string) {
+    papel.value = quem
+    atendente.value = nome.trim() || (quem === 'gerente' ? 'Gerente' : 'Atendente')
     sessaoId.value = null
     cliente.value = null
     guardar()
   }
+  const entrarComoSuporte = (nome: string) => entrarComoEquipe('suporte', nome)
+  const entrarComoGerente = (nome: string) => entrarComoEquipe('gerente', nome)
 
   async function sair() {
     papel.value = null
@@ -59,6 +62,6 @@ export function useAcesso() {
     await navigateTo('/')
   }
 
-  const nome = computed(() => (papel.value === 'suporte' ? atendente.value : (cliente.value?.nome ?? '')))
-  return { papel, atendente, sessaoId, cliente, saudacao, nome, restaurar, guardar, entrarComoCliente, entrarComoSuporte, sair }
+  const nome = computed(() => (papel.value === 'cliente' ? (cliente.value?.nome ?? '') : papel.value ? atendente.value : ''))
+  return { papel, atendente, sessaoId, cliente, saudacao, nome, restaurar, guardar, entrarComoCliente, entrarComoSuporte, entrarComoGerente, sair }
 }

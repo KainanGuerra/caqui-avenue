@@ -1,4 +1,4 @@
-export type Papel = 'cliente' | 'suporte'
+export type Papel = 'cliente' | 'suporte' | 'gerente'
 
 /** `tambem`: páginas que não estão no menu mas pertencem ao item (marcam a aba e seguem a mesma proteção). */
 export type ItemMenu = { chave: string; rotulo: string; icone: string; para: string; papeis: Papel[]; tambem?: string[] }
@@ -12,6 +12,7 @@ export const ITENS_MENU: ItemMenu[] = [
   { chave: 'aprender', rotulo: 'Aprender', icone: 'i-lucide-book-open', para: '/aprender', papeis: ['cliente'] },
   { chave: 'atendimento', rotulo: 'Atendimento', icone: 'i-lucide-message-circle', para: '/atendimento', papeis: ['cliente'], tambem: ['/conversa'] },
   { chave: 'suporte', rotulo: 'Fila de atendimento', icone: 'i-lucide-headset', para: '/suporte', papeis: ['suporte'] },
+  { chave: 'gerente', rotulo: 'Painel gerencial', icone: 'i-lucide-chart-column', para: '/gerente', papeis: ['gerente'] },
 ]
 
 export const menuDoPapel = (papel: Papel): ItemMenu[] => ITENS_MENU.filter((i) => i.papeis.includes(papel))
@@ -21,7 +22,8 @@ const dentroDe = (base: string, caminho: string) => caminho === base || caminho.
 export const itemAtivo = (item: Pick<ItemMenu, 'para' | 'tambem'>, caminho: string): boolean =>
   [item.para, ...(item.tambem ?? [])].some((base) => dentroDe(base, caminho))
 
-export const casaDoPapel = (papel: Papel): string => (papel === 'suporte' ? '/suporte' : '/inicio')
+const CASA: Record<Papel, string> = { cliente: '/inicio', suporte: '/suporte', gerente: '/gerente' }
+export const casaDoPapel = (papel: Papel): string => CASA[papel]
 
 // Cada papel só abre as próprias telas; sem papel, só a entrada. Devolve para onde ir, ou null se pode ficar.
 export function destinoPermitido(papel: Papel | null, caminho: string): string | null {

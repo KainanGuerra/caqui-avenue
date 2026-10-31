@@ -16,6 +16,9 @@ services:
       LLM_TIMEOUT_MS: ${LLM_TIMEOUT_MS:-8000}
       UNDERSTANDING_LLM: ${UNDERSTANDING_LLM:-false}
       ATENDENTE_PIN: ${ATENDENTE_PIN:-}
+      GERENTE_PIN: ${GERENTE_PIN:-}
+      LLM_PRECO_ENTRADA_BRL_MTOK: ${LLM_PRECO_ENTRADA_BRL_MTOK:-0}
+      LLM_PRECO_SAIDA_BRL_MTOK: ${LLM_PRECO_SAIDA_BRL_MTOK:-0}
     volumes:
       # Dados fictícios do case (cópia em ./data), somente leitura: o container nunca altera os dados.
       - ./data:/dados:ro

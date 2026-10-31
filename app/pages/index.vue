@@ -8,11 +8,13 @@ const chat = useChat()
 const acesso = useAcesso()
 const { data: clientes } = await useFetch<ClienteResumo[]>('/api/clientes', { default: () => [] })
 const { data: estado } = await useFetch<{ aberto: boolean }>('/api/suporte/estado', { default: () => ({ aberto: true }) })
+const { data: estadoGerente } = await useFetch<{ aberto: boolean }>('/api/gerente/estado', { default: () => ({ aberto: true }) })
 
 const aba = ref('cliente')
 const abas = [
   { label: 'Sou cliente', value: 'cliente', icon: 'i-lucide-user-round' },
   { label: 'Sou da equipe', value: 'equipe', icon: 'i-lucide-headset' },
+  { label: 'Sou gerente', value: 'gerente', icon: 'i-lucide-chart-column' },
 ]
 const busca = ref('')
 const ocupado = ref<string | null>(null)
@@ -51,6 +53,23 @@ async function entrarEquipe() {
     ocupado.value = null
   }
 }
+
+async function entrarGerente() {
+  ocupado.value = 'gerente'
+  falhou.value = ''
+  try {
+    await $fetch('/api/gerente/login', { method: 'POST', body: { pin: pin.value } })
+    acesso.entrarComoGerente('Helena')
+    await navigateTo('/gerente')
+  } catch {
+    falhou.value = 'PIN incorreto.'
+  } finally {
+    ocupado.value = null
+  }
+}
+
+// O PIN digitado numa aba não vale para a outra.
+watch(aba, () => { pin.value = ''; falhou.value = '' })
 </script>
 
 <template>
@@ -92,6 +111,23 @@ async function entrarEquipe() {
           <li v-if="!outros.length" class="py-3 text-center text-sm text-muted">Ninguém com esse nome.</li>
         </ul>
       </details>
+    </section>
+
+    <section v-else-if="aba === 'gerente'" class="space-y-3" aria-label="Gerência">
+      <div class="flex items-center gap-3 rounded-xl border border-default bg-default p-3">
+        <UAvatar text="H" size="md" class="bg-primary/10 text-primary" />
+        <div class="min-w-0 flex-1">
+          <p class="font-medium">Helena</p>
+          <p class="text-xs text-muted">Gerente · acompanha volume, resolução, escalonamentos, qualidade, custo e latência</p>
+        </div>
+      </div>
+      <form class="space-y-3" @submit.prevent="entrarGerente">
+        <UFormField v-if="!estadoGerente?.aberto" label="PIN do gerente" help="Definido em GERENTE_PIN.">
+          <UInput v-model="pin" type="password" inputmode="numeric" autocomplete="off" class="w-full" />
+        </UFormField>
+        <p v-else class="text-sm text-muted">Painel sem PIN (uso local). Defina GERENTE_PIN para proteger.</p>
+        <UButton type="submit" block size="lg" icon="i-lucide-log-in" :loading="ocupado === 'gerente'" :disabled="!estadoGerente?.aberto && !pin" label="Entrar como Helena" data-testid="entrar-gerente" />
+      </form>
     </section>
 
     <section v-else class="space-y-3" aria-label="Equipe de suporte">

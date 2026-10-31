@@ -11,7 +11,9 @@ import { criarSessionStore, type SessionStore } from '../infrastructure/stores/s
 import { redatorTemplate } from '../infrastructure/llm/template'
 import { llmAnthropic } from '../infrastructure/llm/anthropic'
 import { llmOpenAiCompativel } from '../infrastructure/llm/openai-compatible'
-import { comDisjuntor, type LlmPort } from '../infrastructure/llm/port'
+import { comDisjuntor, comMedicao, type LlmPort } from '../infrastructure/llm/port'
+import { criarMetricsStore, type MetricsStore } from '../infrastructure/stores/metrics-store'
+import { ManagementService } from '../application/management-service'
 import { redatorLlm } from '../infrastructure/llm/redator-llm'
 import { entendimentoLlm } from '../infrastructure/llm/entendimento-llm'
 import { kaki, type Persona } from '../persona'
@@ -26,14 +28,18 @@ export type Container = {
   pipeline: Pipeline
   pedidos: PedidoService
   logger: Logger
+  metricas: MetricsStore
+  gestao: ManagementService
 }
 
 export type Overrides = Partial<{ env: Env; redator: Redator; entendimento: Entendimento | null; clock: Clock; logger: Logger; persona: Persona; dados: Dados }>
 
-function criarPorta(env: Env): LlmPort | null {
+// A medição fica por dentro do disjuntor: chamada recusada com o disjuntor aberto não foi ao provedor e não custa.
+function criarPorta(env: Env, metricas: MetricsStore): LlmPort | null {
   const base = { chave: env.LLM_API_KEY, modelo: env.LLM_MODEL, baseUrl: env.LLM_BASE_URL, timeoutMs: env.LLM_TIMEOUT_MS }
-  if (env.LLM_PROVIDER === 'anthropic') return comDisjuntor(llmAnthropic(base))
-  if (env.LLM_PROVIDER === 'openai') return comDisjuntor(llmOpenAiCompativel(base))
+  const medir = (p: LlmPort) => comDisjuntor(comMedicao(p, metricas.registrarLlm))
+  if (env.LLM_PROVIDER === 'anthropic') return medir(llmAnthropic(base))
+  if (env.LLM_PROVIDER === 'openai') return medir(llmOpenAiCompativel(base))
   return null
 }
 
@@ -42,7 +48,8 @@ export function montarContainer(o: Overrides = {}): Container {
   const env = o.env ?? loadEnv()
   const dados = o.dados ?? carregarDados(env.dadosDir)
   const logger = o.logger ?? criarLogger()
-  const porta = criarPorta(env)
+  const metricas = criarMetricsStore()
+  const porta = criarPorta(env, metricas)
   const sessoes = criarSessionStore()
   const casos = new CaseService(criarCaseStore())
   // Um calendário e um relógio para o chat e para a Home: os dois contam o prazo a partir do mesmo "hoje".
@@ -52,11 +59,14 @@ export function montarContainer(o: Overrides = {}): Container {
     dados, cal, sessoes, casos,
     redator: o.redator ?? (porta ? redatorLlm(porta) : redatorTemplate),
     entendimento: o.entendimento !== undefined ? o.entendimento : porta && env.UNDERSTANDING_LLM ? entendimentoLlm(porta) : null,
-    persona: o.persona ?? kaki, clock: relogio, logger,
+    persona: o.persona ?? kaki, clock: relogio, logger, metricas,
   })
   // Pedidos das páginas usam o mesmo relógio e a mesma fila do chat: o caso é um só, venha de onde vier.
   const pedidos = new PedidoService({ dados, sessoes, casos, clock: relogio })
-  return { env, dados, cal, relogio, sessoes, casos, pipeline, pedidos, logger }
+  // Preço em reais por milhão de tokens vira centavos inteiros aqui, na borda.
+  const precos = { entradaCentavosMtok: Math.round(env.LLM_PRECO_ENTRADA_BRL_MTOK * 100), saidaCentavosMtok: Math.round(env.LLM_PRECO_SAIDA_BRL_MTOK * 100) }
+  const gestao = new ManagementService(metricas, casos, precos, env.LLM_PROVIDER)
+  return { env, dados, cal, relogio, sessoes, casos, pipeline, pedidos, logger, metricas, gestao }
 }
 
 let unico: Container | null = null

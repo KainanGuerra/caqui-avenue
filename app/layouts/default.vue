@@ -69,7 +69,7 @@ const rotuloTema = computed(() => ({ light: 'Tema claro', mixed: 'Tema misto (to
           </UTooltip>
           <template v-if="entrou">
             <UAvatar :text="iniciais(acesso.nome.value)" size="sm" :alt="acesso.nome.value" class="ml-1" />
-            <span class="hidden max-w-40 truncate text-default sm:inline">{{ acesso.nome.value }}<span v-if="acesso.papel.value === 'suporte'" class="text-muted"> · suporte</span></span>
+            <span class="hidden max-w-40 truncate text-default sm:inline">{{ acesso.nome.value }}<span v-if="acesso.papel.value !== 'cliente'" class="text-muted"> · {{ acesso.papel.value }}</span></span>
             <UTooltip text="Sair">
               <UButton color="neutral" variant="ghost" icon="i-lucide-log-out" aria-label="Sair" @click="chat.sair()" />
             </UTooltip>

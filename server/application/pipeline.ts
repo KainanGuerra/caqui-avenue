@@ -12,6 +12,8 @@ import type { Acao, Fonte } from '../domain/types'
 import type { Dados } from '../infrastructure/data/dados'
 import type { Clock } from '../infrastructure/clock'
 import type { Logger } from '../infrastructure/logger'
+import type { MetricsStore } from '../infrastructure/stores/metrics-store'
+import type { Redacao } from '../domain/management-metrics'
 import type { SessionStore } from '../infrastructure/stores/session-store'
 import type { Persona } from '../persona'
 import { montarPlano, type Plano } from './answer-plan'
@@ -47,6 +49,7 @@ export type DepsPipeline = {
   persona: Persona
   clock: Clock
   logger: Logger
+  metricas: MetricsStore
 }
 
 const ENCAMINHAMENTOS: Acao[] = ['encaminhar_humano', 'encaminhar_especialista', 'seguranca_imediata', 'protocolo']
@@ -118,13 +121,14 @@ export class Pipeline {
     let final = plano.texto
     let origem: 'template' | 'llm' = 'template'
     let motivoFallback: string | null = null
+    let redacao: Redacao = 'template'
     try {
       const reescrito = await this.d.redator.redigir(plano, persona, textoSeguro)
       if (reescrito) {
         const v = validar(reescrito, plano, persona, conta.cliente.id)
-        if (v.ok) { final = reescrito; origem = 'llm' } else motivoFallback = v.problemas.join('; ')
+        if (v.ok) { final = reescrito; origem = 'llm'; redacao = 'llm' } else { motivoFallback = v.problemas.join('; '); redacao = 'reprovada' }
       }
-    } catch (e) { motivoFallback = e instanceof Error ? e.message : 'erro' }
+    } catch (e) { motivoFallback = e instanceof Error ? e.message : 'erro'; redacao = 'erro' }
     const vFinal = validar(final, plano, persona, conta.cliente.id)
     if (!vFinal.ok && origem === 'template') this.d.logger.info('template.reprovado', { trace, problemas: vFinal.problemas })
 
@@ -150,6 +154,10 @@ export class Pipeline {
       trace, sessao: sessao.id, cliente: conta.cliente.id, acao: decisao.acao, motivos: decisao.motivos,
       sinais: Object.keys(sinais), intencoes, kb: achadoKb?.artigo.id ?? null, origemTexto: origem, fallback: motivoFallback,
       caracteres: textoSeguro.length, ms: Date.now() - t0,
+    })
+    this.d.metricas.registrarResposta({
+      em: agoraIso, sessaoId: sessao.id, acao: decisao.acao, motivos: decisao.motivos, redacao,
+      comFonte: fontes.length > 0, naoEntendeu: decisao.naoEntendeu, ms: Date.now() - t0,
     })
 
     return {

@@ -169,6 +169,7 @@ DIAGRAMA_DE = {
     'home.feature': 'fluxo-home',
     'atendimento.feature': 'fluxo-atendimento',
     'paginas-do-cliente.feature': 'fluxo-paginas-do-cliente',
+    'painel-do-gerente.feature': 'fluxo-gerente',
 }
 
 
@@ -314,12 +315,15 @@ def build(images):
     s += pagina('Jornada do Jonas', 'Entrega ao humano sem repeti\u00e7\u00e3o',
                 'O resumo \u00e9 montado pelo c\u00f3digo.', 'sequencia-entrega-ao-humano', 360,
                 ['Fila ordenada: golpe, idosos, demais.', 'CPF sempre mascarado no painel.', 'Fora do hor\u00e1rio o caso espera com protocolo e entra na fila \u00e0s 8h.'], lado=True)
-    s += pagina('Login e pap\u00e9is', 'Duas vis\u00f5es no mesmo app: cliente e suporte',
+    s += pagina('Login e pap\u00e9is', 'Tr\u00eas vis\u00f5es no mesmo app: cliente, suporte e gerente',
                 'Login simulado por sele\u00e7\u00e3o, sem senha.', 'fluxo-login-e-papeis', 290,
                 ['A lista vem dos dados sint\u00e9ticos; o servidor guarda a sess\u00e3o.', 'O papel da sess\u00e3o filtra o que cada um v\u00ea, no servidor.', 'Premissa: seguran\u00e7a e especialista usam a mesma fila (D10).'])
     s += pagina('Fluxo do atendente', 'Da fila ao fechamento do caso',
                 'O Jonas n\u00e3o pergunta de novo o que o cliente j\u00e1 contou.', 'fluxo-atendente', 290,
                 ['Golpe segue \u00e0 seguran\u00e7a; recomenda\u00e7\u00e3o segue ao especialista.', 'Fora do hor\u00e1rio o caso entra na fila \u00e0s 8h.', 'Fechar guarda o hist\u00f3rico pelo protocolo.'])
+    s += pagina('Painel do gerente', 'A opera\u00e7\u00e3o da Kaki ao vivo',
+                'O servidor calcula; a tela s\u00f3 exibe. Nenhum texto de conversa chega ao painel.', 'fluxo-gerente', 330,
+                ['Volume, resolu\u00e7\u00e3o autom\u00e1tica e escalonadas; casos em p\u00e1ginas de 10, com filtro por status.', 'Qualidade: respostas da IA barradas, respostas com fonte e mensagens n\u00e3o entendidas.', 'Custo estimado por caracteres (pre\u00e7o no .env) e tempo m\u00e9dio de resposta; PIN pr\u00f3prio (D19).'], lado=True)
     s += pagina('Home do cliente', 'O que est\u00e1 em andamento, sem a tela calcular nada',
                 'O servidor monta patrim\u00f4nio, etapas, aloca\u00e7\u00e3o e avisos; a tela s\u00f3 exibe.', 'fluxo-home', 360,
                 ['As etapas usam o corte das 16h e os dias \u00fateis, com fonte KB-006 e o id da opera\u00e7\u00e3o.', 'Feriado nos pr\u00f3ximos 5 dias \u00fateis vira aviso; feriado no fim de semana n\u00e3o.', 'Nenhuma a\u00e7\u00e3o abre a conversa: Resgatar leva \u00e0 Carteira e Investir \u00e0 p\u00e1gina de produtos.'], lado=True)

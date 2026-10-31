@@ -16,7 +16,7 @@ A fonte das regras é `../../caqui-invest/CASE.md` (pasta só de consulta) e os 
 
 | Arquivo | Funcionalidade | Regras | Perguntas de teste | Cenários |
 |---|---|---|---|---:|
-| [`acesso-e-papeis.feature`](acesso-e-papeis.feature) | Acesso simulado e papéis | transversal | sem PT (variações e regras transversais) | 8 |
+| [`acesso-e-papeis.feature`](acesso-e-papeis.feature) | Acesso simulado e papéis | transversal | sem PT (variações e regras transversais) | 9 |
 | [`atendimento.feature`](atendimento.feature) | Página de Atendimento do cliente | 1, 4, 5, 9, 10, 12 | sem PT (variações e regras transversais) | 12 |
 | [`cliente-vulneravel.feature`](cliente-vulneravel.feature) | Cliente vulnerável tem prioridade humana | 6 | PT-22, PT-23, PT-24 | 6 |
 | [`comparacao-poupanca.feature`](comparacao-poupanca.feature) | Comparação de rendimento com a poupança | 3 | PT-10, PT-11, PT-12 | 5 |
@@ -31,6 +31,7 @@ A fonte das regras é `../../caqui-invest/CASE.md` (pasta só de consulta) e os 
 | [`nao-sabe.feature`](nao-sabe.feature) | Não sabe, diz que não sabe | 9 | PT-29, PT-30, PT-31, PT-39, PT-40 | 9 |
 | [`paginas-do-cliente.feature`](paginas-do-cliente.feature) | Páginas do cliente e rodapé, com a conversa como última alternativa | 1, 4, 5, 9, 10, 12 | sem PT (variações e regras transversais) | 13 |
 | [`painel-do-atendente.feature`](painel-do-atendente.feature) | Painel do atendente | transversal | sem PT (variações e regras transversais) | 8 |
+| [`painel-do-gerente.feature`](painel-do-gerente.feature) | Painel do gerente | transversal | sem PT (variações e regras transversais) | 13 |
 | [`prioridade-de-sinais.feature`](prioridade-de-sinais.feature) | Prioridade entre sinais na mesma mensagem | 5 | PT-19 | 5 |
 | [`reclamacao-e-cancelamento.feature`](reclamacao-e-cancelamento.feature) | Reclamação e cancelamento em qualquer passo | 7 | PT-25, PT-26 | 6 |
 | [`recomendacao.feature`](recomendacao.feature) | Nenhuma recomendação de investimento | 4 | PT-13, PT-14, PT-15, PT-16, PT-17 | 4 |

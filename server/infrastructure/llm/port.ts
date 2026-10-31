@@ -27,3 +27,21 @@ export function comDisjuntor(porta: LlmPort, opcoes: { falhas?: number; pausaMs?
     },
   }
 }
+
+/** Mede cada chamada (tamanho do pedido e da resposta, tempo, sucesso) para o painel do gerente, sem guardar o texto. */
+export function comMedicao(porta: LlmPort, registrar: (r: { caracteresEntrada: number; caracteresSaida: number; ms: number; ok: boolean }) => void, agora: () => number = Date.now): LlmPort {
+  return {
+    async completar(p) {
+      const t0 = agora()
+      const caracteresEntrada = p.system.length + p.usuario.length
+      try {
+        const r = await porta.completar(p)
+        registrar({ caracteresEntrada, caracteresSaida: r.length, ms: agora() - t0, ok: true })
+        return r
+      } catch (e) {
+        registrar({ caracteresEntrada, caracteresSaida: 0, ms: agora() - t0, ok: false })
+        throw e
+      }
+    },
+  }
+}

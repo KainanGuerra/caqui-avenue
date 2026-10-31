@@ -15,6 +15,10 @@ const schema = z.object({
   LLM_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
   UNDERSTANDING_LLM: bool,
   ATENDENTE_PIN: z.string().default(''),
+  GERENTE_PIN: z.string().default(''),
+  // Preço do modelo em reais por milhão de tokens, só para a estimativa de custo do painel do gerente. Zero: sem preço.
+  LLM_PRECO_ENTRADA_BRL_MTOK: z.coerce.number().nonnegative().default(0),
+  LLM_PRECO_SAIDA_BRL_MTOK: z.coerce.number().nonnegative().default(0),
   // dados: dia fixo dos dados (18/11/2026) com a hora real de São Paulo; real: data e hora reais; ou um ISO fixo.
   RELOGIO: z.string().default('dados').refine((v) => v === 'dados' || v === 'real' || /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(v), 'use dados, real ou um ISO'),
 })
